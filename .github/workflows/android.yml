@@ -3,6 +3,11 @@ name: Android verification
 on:
   push:
   pull_request:
+  workflow_dispatch:
+  schedule:
+    # Full API 26 suite runs weekly instead of on every push; it is known to have
+    # pre-existing UI failures on the emulator image and takes ~40 minutes.
+    - cron: '0 3 * * 1'
 
 permissions:
   contents: read
@@ -74,6 +79,7 @@ jobs:
   instrumented-test-api-26:
     name: Instrumented tests (API 26)
     needs: build-and-unit-test
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
