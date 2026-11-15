@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 雪 · 山水小组件背景：冷白天空 + 雪点 + 双层山影 + 水面。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="180dp"
+    android:height="120dp"
+    android:viewportWidth="360"
+    android:viewportHeight="240">
+    <group>
+        <clip-path android:pathData="M24,0 H336 A24,24 0 0 1 360,24 V216 A24,24 0 0 1 336,240 H24 A24,24 0 0 1 0,216 V24 A24,24 0 0 1 24,0 Z" />
+        <path android:pathData="M0,0 H360 V240 H0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="180" android:startY="0"
+                    android:endX="180" android:endY="240"
+                    android:startColor="#E6EDF4"
+                    android:endColor="#FBFDFF" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M258,38 m-5,0 a5,5 0 1 1 10,0 a5,5 0 1 1 -10,0 M296,58 m-4,0 a4,4 0 1 1 8,0 a4,4 0 1 1 -8,0 M322,34 m-4,0 a4,4 0 1 1 8,0 a4,4 0 1 1 -8,0 M276,84 m-3.5,0 a3.5,3.5 0 1 1 7,0 a3.5,3.5 0 1 1 -7,0 M318,78 m-3,0 a3,3 0 1 1 6,0 a3,3 0 1 1 -6,0"
+            android:fillColor="#CBDCE9" />
+        <path
+            android:pathData="M0,240 V150 C40,138 70,102 105,98 C140,94 158,128 192,138 C230,150 250,116 285,112 C315,108 340,128 360,124 V240 Z"
+            android:fillColor="#C5D6E1" />
+        <path
+            android:pathData="M0,240 V196 C50,188 78,152 118,150 C150,148 168,176 205,182 C240,188 262,162 296,160 C322,158 344,170 360,168 V240 Z"
+            android:fillColor="#A9BFCF" />
+        <path
+            android:pathData="M0,240 V224 C60,218 120,228 180,224 C240,220 300,228 360,222 V240 Z"
+            android:fillColor="#DFE9F1" />
+    </group>
+</vector>

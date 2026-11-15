@@ -1,0 +1,60 @@
+# Known legacy orphan strings (declared in app/src/main/res/values/strings.xml but
+# referenced nowhere under app/src). Captured 2026-11-03 by the first run of
+# scripts/check-orphan-strings.ps1 (55 entries). Each entry is reviewed debt: clean
+# it up when touching the related screen. NEW orphans must NOT be added here — they
+# fail the gate and are fixed by deletion, a real reference, or tools:ignore.
+active_tasks
+add
+add_first_task
+ai_advice_generic_result
+ai_advisor_not_configured
+complete_task
+completion_summary
+current_plan_segment_count
+date_overrides
+due_date_format
+estimated_days_format
+execution_logs
+history_tasks
+latest_feedback
+list_only_plan
+local_planner_notice
+merge_plan_segment
+mine_coming_soon
+no_active_tasks
+no_date_overrides
+no_history_tasks
+no_plan_segments
+no_weekly_blocks
+other_active_tasks
+plan_draft_drag_hint
+plan_draft_task_order
+plan_feasibility_warning
+plan_needs_update
+planning_team_saving
+priority_reason_ai_neutral
+reading_timetable
+reminder_toggle_label
+request_agent_breakdown
+request_agent_daily_summary
+request_agent_difficulty
+request_agent_replan
+request_agent_sorting
+request_ai_advice
+split_plan_segment
+start
+task_description_hint
+task_detail
+task_feedback
+task_information
+task_introduction_hint
+task_introduction_optional
+time_coming_soon
+time_hint
+time_intro
+today_empty
+today_schedule
+unscheduled_duration
+view_plan
+view_plan_history
+weekly_blocks

@@ -1,0 +1,1256 @@
+{
+  "summary": {
+    "total": 499,
+    "ok": 486,
+    "accuracy": 0.9739478957915831,
+    "unsafe": 0,
+    "unsafeRate": 0,
+    "deferred": 0,
+    "coverage": 1,
+    "byCategory": {
+      "create_explicit": {
+        "total": 120,
+        "ok": 120,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "create_date_only": {
+        "total": 60,
+        "ok": 60,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "capture_no_date": {
+        "total": 50,
+        "ok": 50,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "routine": {
+        "total": 80,
+        "ok": 80,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "move": {
+        "total": 50,
+        "ok": 50,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "status": {
+        "total": 40,
+        "ok": 40,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "review": {
+        "total": 40,
+        "ok": 38,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "adversarial": {
+        "total": 59,
+        "ok": 48,
+        "unsafe": 0,
+        "deferred": 0
+      }
+    },
+    "byTag": {
+      "explicit": {
+        "total": 120,
+        "ok": 120,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "assignment": {
+        "total": 80,
+        "ok": 80,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "rules": {
+        "total": 333,
+        "ok": 333,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "exam": {
+        "total": 50,
+        "ok": 50,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "meeting": {
+        "total": 51,
+        "ok": 51,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "competition": {
+        "total": 66,
+        "ok": 66,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "errand": {
+        "total": 67,
+        "ok": 67,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "habit": {
+        "total": 45,
+        "ok": 45,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "generic": {
+        "total": 45,
+        "ok": 45,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "date-only": {
+        "total": 61,
+        "ok": 61,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "capture": {
+        "total": 52,
+        "ok": 52,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "routine": {
+        "total": 92,
+        "ok": 91,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "daily": {
+        "total": 22,
+        "ok": 22,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "auto-time": {
+        "total": 43,
+        "ok": 43,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "workdays": {
+        "total": 20,
+        "ok": 20,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "explicit-time": {
+        "total": 40,
+        "ok": 40,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "weekend": {
+        "total": 20,
+        "ok": 20,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "weekly": {
+        "total": 20,
+        "ok": 20,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "move": {
+        "total": 52,
+        "ok": 51,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "status": {
+        "total": 40,
+        "ok": 40,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "complete": {
+        "total": 11,
+        "ok": 11,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "cancel": {
+        "total": 11,
+        "ok": 11,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "postpone": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "progress": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "review": {
+        "total": 42,
+        "ok": 38,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "self-report": {
+        "total": 42,
+        "ok": 38,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "ai": {
+        "total": 83,
+        "ok": 70,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "correction": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "constraint": {
+        "total": 2,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "range": {
+        "total": 3,
+        "ok": 3,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "cross-midnight": {
+        "total": 1,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "anchor": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "unsupported-recurrence": {
+        "total": 2,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "relative-date": {
+        "total": 3,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "due-date": {
+        "total": 3,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "deadline": {
+        "total": 6,
+        "ok": 6,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "actual": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "chat": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "no-action": {
+        "total": 2,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "query": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "free-time": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "time-budget": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "ambiguous": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "missing-task": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "pronoun": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "busy-block": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "conditional": {
+        "total": 2,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "note": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "multi-intent": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "overlap": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "break": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "spread": {
+        "total": 1,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "fixed-block": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "typo": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "dialect": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "arabic": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "decimal": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "date-format": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "english-unit": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "english": {
+        "total": 1,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "self-correction": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "date-range": {
+        "total": 1,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "boundary": {
+        "total": 1,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "bulk-move": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "overdue": {
+        "total": 1,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 0
+      }
+    }
+  },
+  "sources": {
+    "rewritten": 15,
+    "postponed": 5,
+    "slots": 427,
+    "floor": 71,
+    "recurrence": 14
+  },
+  "failures": [
+    {
+      "id": "V008",
+      "utterance": "报名蓝桥杯没做完，明天再给我两小时",
+      "gold": {
+        "intent": "plan",
+        "review": {
+          "incomplete": true,
+          "progress": null,
+          "extraDate": "2026-11-16",
+          "extraDuration": 120
+        },
+        "items": []
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "update",
+            "name": "报名蓝桥杯",
+            "date": null,
+            "startMinute": null,
+            "endMinute": null,
+            "durationMinutes": null,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": null,
+            "autoPicked": false
+          }
+        ],
+        "reply": "好的，明白。我把“报名蓝桥杯”这项待办的预估时长更新为 2 小时，并把它排到明天。",
+        "source": "ai",
+        "proposalId": "1ad20913-d53e-4ec3-a46d-417959c61131"
+      },
+      "evaluation": {
+        "id": "V008",
+        "category": "review",
+        "tags": [
+          "review",
+          "self-report",
+          "ai"
+        ],
+        "utterance": "报名蓝桥杯没做完，明天再给我两小时",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [],
+        "missingExtraSchedule": true,
+        "review": {
+          "incomplete": false,
+          "extraDate": false,
+          "duration": false,
+          "progress": true
+        }
+      }
+    },
+    {
+      "id": "V040",
+      "utterance": "昨天没去教务处盖章，今天补上",
+      "gold": {
+        "intent": "plan",
+        "review": {
+          "incomplete": true,
+          "progress": null,
+          "extraDate": "2026-11-15",
+          "extraDuration": null
+        },
+        "items": []
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "schedule",
+            "name": "去教务处盖章",
+            "date": "2026-11-15",
+            "startMinute": 760,
+            "endMinute": null,
+            "durationMinutes": 45,
+            "weekdays": null,
+            "move": true,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": {
+              "id": "37a3763b-fdc9-40d3-b706-6a68331bbe77",
+              "date": "2026-11-15",
+              "startMinute": 760,
+              "endMinute": 805,
+              "trackId": "focus",
+              "nestedUnderId": null,
+              "nestedUnderTitle": null,
+              "fromUser": true
+            },
+            "autoPicked": false
+          }
+        ],
+        "reply": "收到。任务本身还挂在今天，不用重复建；我把它从今天 15:00 挪到现在 12:40 开始，给你留出补办的时间。",
+        "source": "ai",
+        "proposalId": "91f80e03-3886-4cc2-bfb9-04cbc71a028b"
+      },
+      "evaluation": {
+        "id": "V040",
+        "category": "review",
+        "tags": [
+          "review",
+          "self-report",
+          "ai"
+        ],
+        "utterance": "昨天没去教务处盖章，今天补上",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [],
+        "missingExtraSchedule": false,
+        "review": {
+          "incomplete": false,
+          "extraDate": true,
+          "duration": true,
+          "progress": true
+        }
+      }
+    },
+    {
+      "id": "A004",
+      "utterance": "晚上十一点到凌晨一点打游戏",
+      "gold": {
+        "intent": "clarify",
+        "items": [],
+        "mustAsk": true
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "打游戏",
+            "date": null,
+            "startMinute": null,
+            "endMinute": null,
+            "durationMinutes": 120,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": null,
+            "autoPicked": false
+          }
+        ],
+        "reply": "给你记下了，晚上 11 点开始、到凌晨 1 点打完，时长 2 小时，属于游戏娱乐。要现在就排上吗？",
+        "source": "ai",
+        "proposalId": "ac1b0848-507b-4a1e-8210-5016cd6df22a"
+      },
+      "evaluation": {
+        "id": "A004",
+        "category": "adversarial",
+        "tags": [
+          "cross-midnight",
+          "ai"
+        ],
+        "utterance": "晚上十一点到凌晨一点打游戏",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": false,
+        "itemResults": [],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A010",
+      "utterance": "每月5号交房租",
+      "gold": {
+        "intent": "clarify",
+        "items": [],
+        "mustAsk": true
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "每月5号交房租",
+            "date": null,
+            "startMinute": null,
+            "endMinute": null,
+            "durationMinutes": 60,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": null,
+            "autoPicked": false
+          }
+        ],
+        "reply": "好的，我帮你记下来了。每月5号交房租。需要我设个每月5号上午的固定提醒吗？",
+        "source": "ai",
+        "proposalId": "b8e0e80c-f08f-4ec0-af10-efab90a1ab8c"
+      },
+      "evaluation": {
+        "id": "A010",
+        "category": "adversarial",
+        "tags": [
+          "unsupported-recurrence",
+          "ai"
+        ],
+        "utterance": "每月5号交房租",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": false,
+        "itemResults": [],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A014",
+      "utterance": "这周三的组会改到周四下午四点",
+      "gold": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "schedule",
+            "name": "组会",
+            "date": "2026-11-19",
+            "startMinute": 960,
+            "durationMinutes": null,
+            "move": true
+          }
+        ]
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "组会",
+            "date": "2026-11-19",
+            "startMinute": 960,
+            "endMinute": null,
+            "durationMinutes": 60,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": {
+              "id": "a0db8326-9c53-4b3d-b521-d416d5e940a6",
+              "date": "2026-11-19",
+              "startMinute": 960,
+              "endMinute": 1020,
+              "trackId": "focus",
+              "nestedUnderId": null,
+              "nestedUnderTitle": null,
+              "fromUser": true
+            },
+            "autoPicked": false
+          }
+        ],
+        "reply": "没看到已有的“组会”任务，我先新建一个，排到 11 月 19 日（周四）16:00，默认按 60 分钟估时。",
+        "source": "ai",
+        "proposalId": "b3d041fd-4e39-4c4f-bc11-4e215f7113c9"
+      },
+      "evaluation": {
+        "id": "A014",
+        "category": "adversarial",
+        "tags": [
+          "move",
+          "relative-date",
+          "ai"
+        ],
+        "utterance": "这周三的组会改到周四下午四点",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [
+          {
+            "ok": false,
+            "unsafe": false,
+            "exact": {
+              "name": true,
+              "action": false,
+              "date": true,
+              "start": true,
+              "duration": null,
+              "weekdays": null,
+              "dueDate": null,
+              "dueMinute": null,
+              "progress": null,
+              "actual": null
+            },
+            "note": "mismatch"
+          }
+        ],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A017",
+      "utterance": "数学只写了一半，明天再给我一个小时",
+      "gold": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "progress",
+            "name": "数学",
+            "progress": 50,
+            "date": null,
+            "startMinute": null,
+            "durationMinutes": null
+          }
+        ]
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "数学",
+            "date": "2026-11-16",
+            "startMinute": 480,
+            "endMinute": null,
+            "durationMinutes": 60,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": {
+              "id": "550eed9e-517e-4a9f-a224-3b72ef7eb197",
+              "date": "2026-11-16",
+              "startMinute": 480,
+              "endMinute": 540,
+              "trackId": "focus",
+              "nestedUnderId": null,
+              "nestedUnderTitle": null,
+              "fromUser": true
+            },
+            "autoPicked": false
+          }
+        ],
+        "reply": "收到，把「数学」排到明天（11-16），一个小时。我按 08:00 开始来排，排期结果在下面。",
+        "source": "ai",
+        "proposalId": "57d99605-2611-416a-9c62-6117ee30e6c8"
+      },
+      "evaluation": {
+        "id": "A017",
+        "category": "adversarial",
+        "tags": [
+          "review",
+          "self-report",
+          "ai"
+        ],
+        "utterance": "数学只写了一半，明天再给我一个小时",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [
+          {
+            "ok": false,
+            "unsafe": false,
+            "exact": {
+              "name": true,
+              "action": false,
+              "date": null,
+              "start": null,
+              "duration": null,
+              "weekdays": null,
+              "dueDate": null,
+              "dueMinute": null,
+              "progress": false,
+              "actual": null
+            },
+            "note": "mismatch"
+          }
+        ],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A031",
+      "utterance": "如果周五下雨就不跑步了",
+      "gold": {
+        "intent": "clarify",
+        "items": [],
+        "mustAsk": true
+      },
+      "prediction": {
+        "intent": "query",
+        "items": [],
+        "reply": "哈哈，这安排挺灵活的。不过日历没法自动感知天气，所以我没法帮你加一个“下雨自动取消”的条件。建议你周五上午看一眼天气预报，要是真下雨，再来告诉我“取消跑步”，我帮你把计划调整掉，这样最稳妥。",
+        "source": "ai"
+      },
+      "evaluation": {
+        "id": "A031",
+        "category": "adversarial",
+        "tags": [
+          "conditional",
+          "ai"
+        ],
+        "utterance": "如果周五下雨就不跑步了",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": false,
+        "itemResults": [],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A041",
+      "utterance": "别把任务排得太满，留半小时缓冲",
+      "gold": {
+        "intent": "query",
+        "items": []
+      },
+      "prediction": {
+        "intent": "clarify",
+        "items": [],
+        "reply": "这天还没有排好的事，先说要做什么，我再来铺。",
+        "source": "ai"
+      },
+      "evaluation": {
+        "id": "A041",
+        "category": "adversarial",
+        "tags": [
+          "constraint",
+          "spread",
+          "ai"
+        ],
+        "utterance": "别把任务排得太满，留半小时缓冲",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": false,
+        "itemResults": [],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A049",
+      "utterance": "tomorrow 3pm meeting 1h",
+      "gold": {
+        "intent": "clarify",
+        "items": [],
+        "mustAsk": true
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "meeting",
+            "date": "2026-11-16",
+            "startMinute": 900,
+            "endMinute": null,
+            "durationMinutes": 60,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": {
+              "id": "cb4d975e-274b-40b0-bdc6-b6a2fd90b776",
+              "date": "2026-11-16",
+              "startMinute": 900,
+              "endMinute": 960,
+              "trackId": "focus",
+              "nestedUnderId": null,
+              "nestedUnderTitle": null,
+              "fromUser": true
+            },
+            "autoPicked": false
+          }
+        ],
+        "reply": "好，给明天的 3 点排个 1 小时会议，排期结果在下面。",
+        "source": "ai",
+        "proposalId": "359a3471-917b-4a62-9e88-cd8c98cbe62c"
+      },
+      "evaluation": {
+        "id": "A049",
+        "category": "adversarial",
+        "tags": [
+          "english",
+          "ai"
+        ],
+        "utterance": "tomorrow 3pm meeting 1h",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": false,
+        "itemResults": [],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A051",
+      "utterance": "下周一到周三每天上午复习高数",
+      "gold": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "routine",
+            "name": "复习高数",
+            "date": null,
+            "startMinute": 600,
+            "durationMinutes": null,
+            "weekdays": [
+              1,
+              2,
+              3
+            ]
+          }
+        ]
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "routine",
+            "name": "复习高数",
+            "date": null,
+            "startMinute": 480,
+            "endMinute": 570,
+            "durationMinutes": 90,
+            "weekdays": [
+              1,
+              2,
+              3
+            ],
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": null,
+            "autoPicked": true
+          }
+        ],
+        "reply": "好，下周一到周三上午各排 90 分钟复习高数，我会按上午时段安排。",
+        "source": "ai",
+        "proposalId": "8a9b25f3-a75a-4790-9c7f-d1ffec26a0ed"
+      },
+      "evaluation": {
+        "id": "A051",
+        "category": "adversarial",
+        "tags": [
+          "date-range",
+          "routine",
+          "ai"
+        ],
+        "utterance": "下周一到周三每天上午复习高数",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [
+          {
+            "ok": false,
+            "unsafe": false,
+            "exact": {
+              "name": true,
+              "action": true,
+              "date": null,
+              "start": false,
+              "duration": null,
+              "weekdays": true,
+              "dueDate": null,
+              "dueMinute": null,
+              "progress": null,
+              "actual": null
+            },
+            "note": "mismatch"
+          }
+        ],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A053",
+      "utterance": "今天晚上不排事，我想休息",
+      "gold": {
+        "intent": "query",
+        "items": []
+      },
+      "prediction": {
+        "intent": "clarify",
+        "items": [],
+        "reply": "好，今晚就歇着。你今天确实没排任何事，晚上也没有固定安排，想休息就安心休息，不用补什么计划。",
+        "source": "ai"
+      },
+      "evaluation": {
+        "id": "A053",
+        "category": "adversarial",
+        "tags": [
+          "boundary",
+          "no-action",
+          "ai"
+        ],
+        "utterance": "今天晚上不排事，我想休息",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": false,
+        "itemResults": [],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A059",
+      "utterance": "我昨天没写报告，今天补上",
+      "gold": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "progress",
+            "name": "写报告",
+            "date": null,
+            "startMinute": null,
+            "durationMinutes": null
+          }
+        ]
+      },
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "补写报告",
+            "date": "2026-11-15",
+            "startMinute": null,
+            "endMinute": null,
+            "durationMinutes": 120,
+            "weekdays": null,
+            "move": false,
+            "progress": null,
+            "dueDate": null,
+            "dueMinute": null,
+            "actualMinutes": null,
+            "placement": {
+              "id": "cba15f21-4937-4b78-aca8-3b04ba29aac2",
+              "date": "2026-11-15",
+              "startMinute": 480,
+              "endMinute": 600,
+              "trackId": "focus",
+              "nestedUnderId": null,
+              "nestedUnderTitle": null,
+              "fromUser": false
+            },
+            "autoPicked": false
+          }
+        ],
+        "reply": "好，那今天补上。我按 2 小时估个时长，排在今天下午的空档；要改时长或优先级直接说。",
+        "source": "ai",
+        "proposalId": "eb9734f2-31c8-4b32-b344-701b697297b4"
+      },
+      "evaluation": {
+        "id": "A059",
+        "category": "adversarial",
+        "tags": [
+          "review",
+          "self-report",
+          "ai"
+        ],
+        "utterance": "我昨天没写报告，今天补上",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [
+          {
+            "ok": false,
+            "unsafe": false,
+            "exact": {
+              "name": true,
+              "action": false,
+              "date": null,
+              "start": null,
+              "duration": null,
+              "weekdays": null,
+              "dueDate": null,
+              "dueMinute": null,
+              "progress": null,
+              "actual": null
+            },
+            "note": "mismatch"
+          }
+        ],
+        "missingExtraSchedule": false
+      }
+    },
+    {
+      "id": "A060",
+      "utterance": "这周数学作业没交，老师说明天要补交",
+      "gold": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "交数学作业",
+            "dueDate": "2026-11-16",
+            "date": null,
+            "startMinute": null,
+            "durationMinutes": null
+          }
+        ]
+      },
+      "prediction": {
+        "intent": "clarify",
+        "items": [
+          {
+            "action": "progress",
+            "name": "这周数学作业没交 老师说 要补交",
+            "date": null,
+            "startMinute": null,
+            "durationMinutes": null,
+            "move": false,
+            "progress": null
+          },
+          {
+            "action": "create",
+            "name": "这周数学作业没交 老师说 要补交",
+            "date": "2026-11-16",
+            "startMinute": null,
+            "durationMinutes": null,
+            "move": false
+          }
+        ],
+        "reply": "明白，那我把明天（11月16日）预留出来交数学作业。你是希望我现在就把这个任务排进明天的日程，还是先记着，等确定了具体几点去交再让我排？",
+        "source": "clarify"
+      },
+      "evaluation": {
+        "id": "A060",
+        "category": "adversarial",
+        "tags": [
+          "overdue",
+          "due-date",
+          "ai"
+        ],
+        "utterance": "这周数学作业没交，老师说明天要补交",
+        "ok": false,
+        "unsafe": false,
+        "deferred": false,
+        "reasons": [],
+        "intentOk": true,
+        "itemResults": [
+          {
+            "ok": false,
+            "unsafe": false,
+            "exact": {
+              "name": false,
+              "action": true,
+              "date": null,
+              "start": null,
+              "duration": null,
+              "weekdays": null,
+              "dueDate": false,
+              "dueMinute": null,
+              "progress": null,
+              "actual": null
+            },
+            "note": "mismatch"
+          }
+        ],
+        "missingExtraSchedule": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "repland-qq-bot",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --env-file=.env index.mjs",
+    "selfcheck": "node selfcheck.mjs"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.1.1"
+  }
+}

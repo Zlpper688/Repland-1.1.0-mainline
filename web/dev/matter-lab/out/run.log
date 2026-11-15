@@ -1,0 +1,154 @@
+corpus 500, selected 500, mode both
+{
+  "total": 500,
+  "byCategory": {
+    "create_explicit": 120,
+    "create_date_only": 60,
+    "capture_no_date": 50,
+    "routine": 80,
+    "move": 50,
+    "status": 40,
+    "review": 40,
+    "adversarial": 60
+  },
+  "byTag": {
+    "explicit": 120,
+    "assignment": 80,
+    "rules": 333,
+    "exam": 50,
+    "meeting": 51,
+    "competition": 66,
+    "errand": 67,
+    "habit": 45,
+    "generic": 45,
+    "date-only": 61,
+    "capture": 52,
+    "routine": 92,
+    "daily": 22,
+    "auto-time": 43,
+    "workdays": 20,
+    "explicit-time": 40,
+    "weekend": 20,
+    "weekly": 20,
+    "move": 52,
+    "status": 40,
+    "complete": 11,
+    "cancel": 11,
+    "postpone": 10,
+    "progress": 10,
+    "review": 42,
+    "self-report": 42,
+    "ai": 84,
+    "correction": 2,
+    "constraint": 2,
+    "range": 3,
+    "cross-midnight": 1,
+    "anchor": 1,
+    "unsupported-recurrence": 2,
+    "relative-date": 3,
+    "due-date": 3,
+    "deadline": 6,
+    "actual": 1,
+    "chat": 1,
+    "no-action": 2,
+    "query": 2,
+    "free-time": 1,
+    "time-budget": 1,
+    "ambiguous": 2,
+    "missing-task": 2,
+    "pronoun": 1,
+    "needs-draft": 1,
+    "busy-block": 1,
+    "conditional": 2,
+    "note": 1,
+    "multi-intent": 2,
+    "overlap": 1,
+    "break": 1,
+    "spread": 1,
+    "fixed-block": 2,
+    "typo": 1,
+    "dialect": 1,
+    "arabic": 1,
+    "decimal": 1,
+    "date-format": 1,
+    "english-unit": 1,
+    "english": 1,
+    "self-correction": 1,
+    "date-range": 1,
+    "boundary": 1,
+    "bulk-move": 1,
+    "overdue": 1
+  }
+}
+rule: {"accuracy":0.992,"coverage":0.942,"coveredAccuracy":0.9978768577494692,"unsafe":0}
+progress 10/500 last=E010 2029ms source=ai
+progress 20/500 last=E020 2244ms source=ai
+progress 30/500 last=E030 3597ms source=ai
+rotated guest account
+progress 40/500 last=E040 2348ms source=ai
+progress 50/500 last=E050 2124ms source=ai
+rotated guest account
+progress 60/500 last=E060 2504ms source=ai
+progress 70/500 last=E070 2319ms source=ai
+progress 80/500 last=E080 2336ms source=ai
+rotated guest account
+progress 90/500 last=E090 2208ms source=ai
+progress 100/500 last=E100 2054ms source=ai
+rotated guest account
+progress 110/500 last=E110 2346ms source=ai
+progress 120/500 last=E120 2136ms source=ai
+progress 130/500 last=D010 2487ms source=ai
+rotated guest account
+progress 140/500 last=D020 2139ms source=ai
+progress 150/500 last=D030 2405ms source=ai
+rotated guest account
+progress 160/500 last=D040 7568ms source=ai
+progress 170/500 last=D050 2255ms source=ai
+progress 180/500 last=D060 2130ms source=ai
+rotated guest account
+progress 190/500 last=C010 2112ms source=ai
+progress 200/500 last=C020 2119ms source=ai
+rotated guest account
+progress 210/500 last=C030 2371ms source=ai
+progress 220/500 last=C040 2290ms source=ai
+progress 230/500 last=C050 2196ms source=ai
+rotated guest account
+progress 240/500 last=R010 2700ms source=ai
+progress 250/500 last=R020 2401ms source=ai
+rotated guest account
+progress 260/500 last=R030 2294ms source=ai
+progress 270/500 last=R040 2031ms source=ai
+progress 280/500 last=R050 2780ms source=ai
+rotated guest account
+progress 290/500 last=R060 2464ms source=ai
+progress 300/500 last=R070 2139ms source=ai
+rotated guest account
+progress 310/500 last=R080 2676ms source=ai
+progress 320/500 last=M010 2864ms source=ai
+progress 330/500 last=M020 2672ms source=ai
+rotated guest account
+progress 340/500 last=M030 2609ms source=ai
+progress 350/500 last=M040 2642ms source=ai
+rotated guest account
+progress 360/500 last=M050 2741ms source=ai
+progress 370/500 last=S010 2419ms source=ai
+progress 380/500 last=S020 2334ms source=ai
+rotated guest account
+progress 390/500 last=S030 3141ms source=ai
+progress 400/500 last=S040 2615ms source=ai
+rotated guest account
+progress 410/500 last=V010 2643ms source=ai
+progress 420/500 last=V020 2630ms source=clarify
+progress 430/500 last=V030 2913ms source=ai
+rotated guest account
+progress 440/500 last=V040 9341ms source=ai
+progress 450/500 last=A010 2430ms source=ai
+rotated guest account
+progress 460/500 last=A020 2490ms source=ai
+progress 470/500 last=A030 2719ms source=ai
+progress 480/500 last=A040 2327ms source=ai
+rotated guest account
+progress 490/500 last=A050 2373ms source=ai
+progress 500/500 last=A060 2205ms source=clarify
+ai: {"accuracy":0.566,"unsafe":59,"total":500}
+report: C:\Users\Lenovo\Documents\Qoder\2026-11-12\041013a3\dev\matter-lab\out/report.md

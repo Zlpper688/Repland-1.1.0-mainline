@@ -1,0 +1,4 @@
+# 真实账号绑定与凭证不入仓库（BYOK，FEISHU_INTEGRATION_NOTES §7）
+config/accounts.json
+*.local.json
+.env

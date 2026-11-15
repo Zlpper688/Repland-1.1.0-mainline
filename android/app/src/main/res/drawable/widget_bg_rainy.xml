@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 雨/雷雨 · 山水小组件背景：青灰天空 + 雨丝 + 双层山影 + 水面。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="180dp"
+    android:height="120dp"
+    android:viewportWidth="360"
+    android:viewportHeight="240">
+    <group>
+        <clip-path android:pathData="M24,0 H336 A24,24 0 0 1 360,24 V216 A24,24 0 0 1 336,240 H24 A24,24 0 0 1 0,216 V24 A24,24 0 0 1 24,0 Z" />
+        <path android:pathData="M0,0 H360 V240 H0 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:type="linear"
+                    android:startX="180" android:startY="0"
+                    android:endX="180" android:endY="240"
+                    android:startColor="#C9D8E2"
+                    android:endColor="#E9EFF3" />
+            </aapt:attr>
+        </path>
+        <path
+            android:pathData="M244,64 a16,16 0 0 1 4,-31 a20,20 0 0 1 38,-6 a15,15 0 0 1 12,37 Z"
+            android:fillColor="#A8BDC9" />
+        <path
+            android:pathData="M258,72 l-6,18 M284,72 l-6,18 M310,72 l-6,18"
+            android:strokeColor="#6D93AA"
+            android:strokeWidth="3.5"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M0,240 V150 C40,138 70,102 105,98 C140,94 158,128 192,138 C230,150 250,116 285,112 C315,108 340,128 360,124 V240 Z"
+            android:fillColor="#93AFBA" />
+        <path
+            android:pathData="M0,240 V196 C50,188 78,152 118,150 C150,148 168,176 205,182 C240,188 262,162 296,160 C322,158 344,170 360,168 V240 Z"
+            android:fillColor="#73919D" />
+        <path
+            android:pathData="M0,240 V224 C60,218 120,228 180,224 C240,220 300,228 360,222 V240 Z"
+            android:fillColor="#BFD4DD" />
+    </group>
+</vector>

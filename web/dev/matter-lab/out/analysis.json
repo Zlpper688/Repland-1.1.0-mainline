@@ -1,0 +1,251 @@
+{
+  "total": 500,
+  "ruleCovered": 471,
+  "ruleCoveredOk": 470,
+  "aiTotal": 499,
+  "aiOk": 340,
+  "aiLocal": 0,
+  "hybridOk": 486,
+  "counts": {
+    "both-ok": 338,
+    "rule-wins": 157,
+    "ai-missing": 1,
+    "ai-wins": 2,
+    "both-fail": 2
+  },
+  "categories": {
+    "create_explicit": {
+      "total": 120,
+      "ruleOk": 120,
+      "ruleCovered": 120,
+      "ruleCoveredOk": 120,
+      "ai": 120,
+      "aiOk": 97,
+      "aiUnsafe": 15
+    },
+    "create_date_only": {
+      "total": 60,
+      "ruleOk": 60,
+      "ruleCovered": 60,
+      "ruleCoveredOk": 60,
+      "ai": 60,
+      "aiOk": 41,
+      "aiUnsafe": 13
+    },
+    "capture_no_date": {
+      "total": 50,
+      "ruleOk": 50,
+      "ruleCovered": 50,
+      "ruleCoveredOk": 50,
+      "ai": 50,
+      "aiOk": 48,
+      "aiUnsafe": 0
+    },
+    "routine": {
+      "total": 80,
+      "ruleOk": 80,
+      "ruleCovered": 80,
+      "ruleCoveredOk": 80,
+      "ai": 80,
+      "aiOk": 53,
+      "aiUnsafe": 16
+    },
+    "move": {
+      "total": 50,
+      "ruleOk": 50,
+      "ruleCovered": 50,
+      "ruleCoveredOk": 50,
+      "ai": 50,
+      "aiOk": 44,
+      "aiUnsafe": 6
+    },
+    "status": {
+      "total": 40,
+      "ruleOk": 40,
+      "ruleCovered": 40,
+      "ruleCoveredOk": 40,
+      "ai": 40,
+      "aiOk": 20,
+      "aiUnsafe": 6
+    },
+    "review": {
+      "total": 40,
+      "ruleOk": 40,
+      "ruleCovered": 34,
+      "ruleCoveredOk": 34,
+      "ai": 40,
+      "aiOk": 4,
+      "aiUnsafe": 0
+    },
+    "adversarial": {
+      "total": 60,
+      "ruleOk": 56,
+      "ruleCovered": 37,
+      "ruleCoveredOk": 36,
+      "ai": 59,
+      "aiOk": 33,
+      "aiUnsafe": 3
+    }
+  },
+  "reasons": {
+    "multi-intent": {
+      "total": 9,
+      "deferred": 9,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 9,
+      "aiOk": 3,
+      "aiUnsafe": 0
+    },
+    "correction": {
+      "total": 3,
+      "deferred": 3,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 2,
+      "aiOk": 2,
+      "aiUnsafe": 0
+    },
+    "cross-midnight": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 0,
+      "aiUnsafe": 0
+    },
+    "relative-anchor": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 0,
+      "aiUnsafe": 0
+    },
+    "unsupported-recurrence": {
+      "total": 2,
+      "deferred": 2,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 2,
+      "aiOk": 1,
+      "aiUnsafe": 0
+    },
+    "ambiguous": {
+      "total": 3,
+      "deferred": 3,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 3,
+      "aiOk": 3,
+      "aiUnsafe": 0
+    },
+    "missing-name": {
+      "total": 3,
+      "deferred": 3,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 2,
+      "aiOk": 2,
+      "aiUnsafe": 0
+    },
+    "pronoun": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 1,
+      "aiUnsafe": 0
+    },
+    "ambiguous-clock": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 1,
+      "aiUnsafe": 0
+    },
+    "conditional": {
+      "total": 2,
+      "deferred": 2,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 2,
+      "aiOk": 1,
+      "aiUnsafe": 0
+    },
+    "fixed-block": {
+      "total": 2,
+      "deferred": 2,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 2,
+      "aiOk": 2,
+      "aiUnsafe": 0
+    },
+    "english": {
+      "total": 2,
+      "deferred": 2,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 2,
+      "aiOk": 1,
+      "aiUnsafe": 0
+    },
+    "english-intent": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 0,
+      "aiUnsafe": 0
+    },
+    "bulk-move": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 1,
+      "aiUnsafe": 0
+    },
+    "people": {
+      "total": 1,
+      "deferred": 1,
+      "covered": 0,
+      "coveredOk": 0,
+      "coveredUnsafe": 0,
+      "ai": 1,
+      "aiOk": 0,
+      "aiUnsafe": 0
+    }
+  },
+  "sources": {
+    "ai": 447,
+    "clarify": 51,
+    "error": 1
+  },
+  "latency": {
+    "avg": 2843,
+    "median": 2385
+  }
+}

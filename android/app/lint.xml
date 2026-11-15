@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Lint severity overrides for :app. AGP picks this file up automatically (module root).
+     Escalates UnusedResources from warning to error; existing findings are absorbed once
+     by app/lint-baseline.xml (generated on the first lint run, see app/build.gradle.kts
+     lint{} block for the generation command), so any NEW unused resource fails :app:lintDebug. -->
+<lint>
+    <issue id="UnusedResources" severity="error" />
+</lint>

@@ -1,0 +1,457 @@
+{
+  "total": 500,
+  "ok": 283,
+  "accuracy": 0.566,
+  "unsafe": 59,
+  "unsafeRate": 0.118,
+  "deferred": 0,
+  "coverage": 1,
+  "byCategory": {
+    "create_explicit": {
+      "total": 120,
+      "ok": 97,
+      "unsafe": 15,
+      "deferred": 0
+    },
+    "create_date_only": {
+      "total": 60,
+      "ok": 41,
+      "unsafe": 13,
+      "deferred": 0
+    },
+    "capture_no_date": {
+      "total": 50,
+      "ok": 48,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "routine": {
+      "total": 80,
+      "ok": 0,
+      "unsafe": 16,
+      "deferred": 0
+    },
+    "move": {
+      "total": 50,
+      "ok": 44,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "status": {
+      "total": 40,
+      "ok": 20,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "review": {
+      "total": 40,
+      "ok": 4,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "adversarial": {
+      "total": 60,
+      "ok": 29,
+      "unsafe": 3,
+      "deferred": 0
+    }
+  },
+  "byTag": {
+    "explicit": {
+      "total": 120,
+      "ok": 97,
+      "unsafe": 15,
+      "deferred": 0
+    },
+    "assignment": {
+      "total": 80,
+      "ok": 52,
+      "unsafe": 11,
+      "deferred": 0
+    },
+    "rules": {
+      "total": 333,
+      "ok": 257,
+      "unsafe": 41,
+      "deferred": 0
+    },
+    "exam": {
+      "total": 50,
+      "ok": 32,
+      "unsafe": 4,
+      "deferred": 0
+    },
+    "meeting": {
+      "total": 51,
+      "ok": 34,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "competition": {
+      "total": 66,
+      "ok": 44,
+      "unsafe": 8,
+      "deferred": 0
+    },
+    "errand": {
+      "total": 67,
+      "ok": 38,
+      "unsafe": 13,
+      "deferred": 0
+    },
+    "habit": {
+      "total": 45,
+      "ok": 23,
+      "unsafe": 8,
+      "deferred": 0
+    },
+    "generic": {
+      "total": 45,
+      "ok": 29,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "date-only": {
+      "total": 61,
+      "ok": 41,
+      "unsafe": 14,
+      "deferred": 0
+    },
+    "capture": {
+      "total": 52,
+      "ok": 49,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "routine": {
+      "total": 92,
+      "ok": 1,
+      "unsafe": 18,
+      "deferred": 0
+    },
+    "daily": {
+      "total": 22,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "auto-time": {
+      "total": 43,
+      "ok": 0,
+      "unsafe": 14,
+      "deferred": 0
+    },
+    "workdays": {
+      "total": 20,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "explicit-time": {
+      "total": 40,
+      "ok": 0,
+      "unsafe": 2,
+      "deferred": 0
+    },
+    "weekend": {
+      "total": 20,
+      "ok": 0,
+      "unsafe": 14,
+      "deferred": 0
+    },
+    "weekly": {
+      "total": 20,
+      "ok": 0,
+      "unsafe": 2,
+      "deferred": 0
+    },
+    "move": {
+      "total": 52,
+      "ok": 44,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "status": {
+      "total": 40,
+      "ok": 20,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "complete": {
+      "total": 11,
+      "ok": 7,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "cancel": {
+      "total": 11,
+      "ok": 7,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "postpone": {
+      "total": 10,
+      "ok": 0,
+      "unsafe": 6,
+      "deferred": 0
+    },
+    "progress": {
+      "total": 10,
+      "ok": 6,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "review": {
+      "total": 42,
+      "ok": 4,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "self-report": {
+      "total": 42,
+      "ok": 4,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "ai": {
+      "total": 84,
+      "ok": 23,
+      "unsafe": 2,
+      "deferred": 0
+    },
+    "correction": {
+      "total": 2,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "constraint": {
+      "total": 2,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "range": {
+      "total": 3,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "cross-midnight": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "anchor": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "unsupported-recurrence": {
+      "total": 2,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "relative-date": {
+      "total": 3,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "due-date": {
+      "total": 3,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "deadline": {
+      "total": 6,
+      "ok": 1,
+      "unsafe": 2,
+      "deferred": 0
+    },
+    "actual": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "chat": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "no-action": {
+      "total": 2,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "query": {
+      "total": 2,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "free-time": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "time-budget": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "ambiguous": {
+      "total": 2,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "missing-task": {
+      "total": 2,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "pronoun": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "needs-draft": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "busy-block": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "conditional": {
+      "total": 2,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "note": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "multi-intent": {
+      "total": 2,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "overlap": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "break": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "spread": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "fixed-block": {
+      "total": 2,
+      "ok": 2,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "typo": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "dialect": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "arabic": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "decimal": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "date-format": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "english-unit": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "english": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "self-correction": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "date-range": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "boundary": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "bulk-move": {
+      "total": 1,
+      "ok": 1,
+      "unsafe": 0,
+      "deferred": 0
+    },
+    "overdue": {
+      "total": 1,
+      "ok": 0,
+      "unsafe": 0,
+      "deferred": 0
+    }
+  }
+}

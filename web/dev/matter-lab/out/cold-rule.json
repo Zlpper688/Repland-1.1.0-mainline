@@ -1,0 +1,390 @@
+{
+  "summary": {
+    "total": 90,
+    "ok": 87,
+    "accuracy": 0.9666666666666667,
+    "unsafe": 0,
+    "unsafeRate": 0,
+    "deferred": 16,
+    "coverage": 0.8222222222222222,
+    "byCategory": {
+      "cold-create": {
+        "total": 21,
+        "ok": 21,
+        "unsafe": 0,
+        "deferred": 3
+      },
+      "cold-vague": {
+        "total": 8,
+        "ok": 8,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cold-move": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cold-status": {
+        "total": 12,
+        "ok": 12,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cold-review": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cold-routine": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cold-due": {
+        "total": 6,
+        "ok": 6,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cold-query": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 4
+      },
+      "cold-multi": {
+        "total": 3,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 3
+      }
+    },
+    "byTag": {
+      "time": {
+        "total": 12,
+        "ok": 12,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "dialect": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "range": {
+        "total": 5,
+        "ok": 5,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "due": {
+        "total": 8,
+        "ok": 8,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "anchor": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 2
+      },
+      "capture": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "date-only": {
+        "total": 3,
+        "ok": 3,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "no-date": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "ambiguous-weekend": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "move": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "complete": {
+        "total": 3,
+        "ok": 3,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "cancel": {
+        "total": 3,
+        "ok": 3,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "progress": {
+        "total": 4,
+        "ok": 4,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "postpone": {
+        "total": 2,
+        "ok": 2,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "review": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "routine": {
+        "total": 10,
+        "ok": 10,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "query": {
+        "total": 4,
+        "ok": 4,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "chat": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "advice": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 0
+      },
+      "conditional": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "pronoun": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "ambiguous": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "english": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "missing-task": {
+        "total": 1,
+        "ok": 1,
+        "unsafe": 0,
+        "deferred": 1
+      },
+      "multi": {
+        "total": 3,
+        "ok": 0,
+        "unsafe": 0,
+        "deferred": 3
+      }
+    }
+  },
+  "ruleOnly": {
+    "total": 90,
+    "covered": 74,
+    "coverage": 0.8222222222222222,
+    "coveredAccuracy": 1,
+    "coveredUnsafe": 0
+  },
+  "failures": [
+    {
+      "id": "K088",
+      "tag": "multi",
+      "utterance": "明天上午十点开会，然后下午三点写报告",
+      "gold": [
+        {
+          "action": "create",
+          "name": "开会",
+          "date": "2026-11-16",
+          "startMinute": 600,
+          "durationMinutes": null
+        },
+        {
+          "action": "create",
+          "name": "写报告",
+          "date": "2026-11-16",
+          "startMinute": 900,
+          "durationMinutes": null
+        }
+      ],
+      "prediction": [],
+      "mustAsk": true,
+      "reasons": [
+        "multi-intent"
+      ],
+      "itemResults": [
+        {
+          "ok": false,
+          "unsafe": false,
+          "exact": {
+            "name": false,
+            "action": false,
+            "date": false,
+            "start": false,
+            "duration": false,
+            "weekdays": false
+          },
+          "note": "missing"
+        },
+        {
+          "ok": false,
+          "unsafe": false,
+          "exact": {
+            "name": false,
+            "action": false,
+            "date": false,
+            "start": false,
+            "duration": false,
+            "weekdays": false
+          },
+          "note": "missing"
+        }
+      ]
+    },
+    {
+      "id": "K089",
+      "tag": "multi",
+      "utterance": "明早八点跑步，顺便取快递",
+      "gold": [
+        {
+          "action": "create",
+          "name": "跑步",
+          "date": "2026-11-16",
+          "startMinute": 480,
+          "durationMinutes": null
+        },
+        {
+          "action": "create",
+          "name": "取快递",
+          "date": "2026-11-16",
+          "startMinute": null,
+          "durationMinutes": null
+        }
+      ],
+      "prediction": [],
+      "mustAsk": true,
+      "reasons": [
+        "multi-intent"
+      ],
+      "itemResults": [
+        {
+          "ok": false,
+          "unsafe": false,
+          "exact": {
+            "name": false,
+            "action": false,
+            "date": false,
+            "start": false,
+            "duration": false,
+            "weekdays": false
+          },
+          "note": "missing"
+        },
+        {
+          "ok": false,
+          "unsafe": false,
+          "exact": {
+            "name": false,
+            "action": false,
+            "date": false,
+            "start": false,
+            "duration": false,
+            "weekdays": false
+          },
+          "note": "missing"
+        }
+      ]
+    },
+    {
+      "id": "K090",
+      "tag": "multi",
+      "utterance": "后天交作业，晚上八点打球两小时",
+      "gold": [
+        {
+          "action": "create",
+          "name": "交作业",
+          "date": "2026-11-17",
+          "startMinute": null,
+          "durationMinutes": null
+        },
+        {
+          "action": "create",
+          "name": "打球",
+          "date": "2026-11-17",
+          "startMinute": 1200,
+          "durationMinutes": 120
+        }
+      ],
+      "prediction": [],
+      "mustAsk": true,
+      "reasons": [
+        "multi-intent"
+      ],
+      "itemResults": [
+        {
+          "ok": false,
+          "unsafe": false,
+          "exact": {
+            "name": false,
+            "action": false,
+            "date": false,
+            "start": false,
+            "duration": false,
+            "weekdays": false
+          },
+          "note": "missing"
+        },
+        {
+          "ok": false,
+          "unsafe": false,
+          "exact": {
+            "name": false,
+            "action": false,
+            "date": false,
+            "start": false,
+            "duration": false,
+            "weekdays": false
+          },
+          "note": "missing"
+        }
+      ]
+    }
+  ]
+}

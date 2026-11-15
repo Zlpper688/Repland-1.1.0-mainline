@@ -1,0 +1,18 @@
+[
+  {
+    "accountToken": "把这里换成队员的账号token",
+    "teamId": "team-demo",
+    "memberId": "m-captain",
+    "memberName": "队长",
+    "openId": "ou_队长在飞书里的open_id，未绑定就留空串",
+    "isCaptain": true
+  },
+  {
+    "accountToken": "其他队员的账号token",
+    "teamId": "team-demo",
+    "memberId": "m-alice",
+    "memberName": "Alice",
+    "openId": "",
+    "isCaptain": false
+  }
+]

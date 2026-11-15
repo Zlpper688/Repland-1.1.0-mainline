@@ -1,0 +1,72 @@
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Gradle and Android build output
+.gradle/
+.gradle-cache/
+.gradle-runtime/
+**/build/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Kotlin compiler caches
+.kotlin/
+**/.kotlin/
+
+# Local Codex/runtime state and generated diagnostics
+.android/
+.localappdata/
+.codex-*.log
+.codex-*.err.log
+.gradle-*.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+.design-preview/
+
+# Local generated assets, emulator data and delivery diagnostics
+/output/
+/.codex-aic-build/
+/.codex-aic-template/
+/.codex-ppt-build/
+
+# Provider credentials and signing material
+.env
+.env.*
+!.env.example
+keystore.properties
+*.jks
+*.keystore
+
+# Upstream design snapshot (kept local only)
+repland-upstream-design.zip
+android/art-inbox/
+
+# Self-hosted server runtime state: live accounts, tokens, team snapshots
+server/config/auth-db.json
+server/config/teams/
+# Real server config (admin token + 内测手机号名单) —— 只留服务器，仓库只有 .example
+server/deploy/deploy.env
+/.verify/
+
+# Web / Node
+node_modules/
+**/node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.qoder-sites/
+.qoder-sites.json
+*.qoder.site
+
+# Local runtime data
+web/qq-bot/data/
+
+# Local build logs
+/android-*.log

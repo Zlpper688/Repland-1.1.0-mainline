@@ -1,0 +1,314 @@
+package com.swan1127.repland.data.room
+
+import androidx.room.withTransaction
+import com.swan1127.repland.domain.model.ExecutionLogEventType
+import com.swan1127.repland.domain.model.TaskDraft
+import com.swan1127.repland.domain.model.TaskDraftValidator
+import com.swan1127.repland.domain.model.TaskExecutionLog
+import com.swan1127.repland.domain.model.TaskFeedback
+import com.swan1127.repland.domain.model.TaskLifecycleValidator
+import com.swan1127.repland.domain.model.TaskName
+import com.swan1127.repland.domain.model.TaskStatus
+import com.swan1127.repland.domain.model.TaskInputSources
+import com.swan1127.repland.domain.model.TaskHorizon
+import com.swan1127.repland.domain.model.TaskMilestones
+import com.swan1127.repland.domain.model.TaskTags
+import com.swan1127.repland.domain.ports.TaskRepository
+import java.util.UUID
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
+class RoomTaskRepository(
+    private val database: ReplandDatabase,
+) : TaskRepository {
+    private val taskDao = database.taskDao()
+    private val executionLogDao = database.executionLogDao()
+
+    override fun observeTasks(): Flow<List<com.swan1127.repland.domain.model.Task>> =
+        taskDao.observeAll().map { entities -> entities.map(TaskEntity::toDomain) }
+
+    override fun observeExecutionLogs(taskId: String): Flow<List<TaskExecutionLog>> =
+        executionLogDao.observeForTask(taskId).map { logs -> logs.map(ExecutionLogEntity::toDomain) }
+
+    override fun observeTotalFocusedMinutes(): Flow<Int> = executionLogDao.observeTotalFocusedMinutes()
+
+    override fun observeExecutionLogsForDate(date: LocalDate): Flow<List<TaskExecutionLog>> {
+        val zone = ZoneId.systemDefault()
+        val start = date.atStartOfDay(zone).toInstant().toEpochMilli()
+        val end = date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+        return executionLogDao.observeBetween(start, end).map { logs -> logs.map(ExecutionLogEntity::toDomain) }
+    }
+
+    override suspend fun updateExisting(draft: TaskDraft) = database.withTransaction {
+        require(TaskDraftValidator.isValid(draft)) { "Invalid task draft." }
+        requireTask(requireNotNull(draft.id) { "Editing requires a task identity." })
+        save(draft)
+    }
+
+    override suspend fun save(draft: TaskDraft) = database.withTransaction {
+        require(TaskDraftValidator.isValid(draft)) { "Invalid task draft." }
+        val now = System.currentTimeMillis()
+        val existing = if (draft.id == null) null else taskDao.getById(draft.id)
+        val entity = TaskEntity(
+            id = existing?.id ?: draft.id ?: UUID.randomUUID().toString(),
+            description = draft.description.trim(),
+            displayName = draft.displayName.trim().ifBlank { TaskName.fromDescription(draft.description) },
+            category = draft.category.name,
+            // Ordinary edits preserve the initial choice; an unknown choice can be supplied explicitly.
+            userPriority = existing?.userPriority?.takeUnless { it == "UNSPECIFIED" } ?: draft.userPriority.name,
+            estimatedDays = draft.estimatedDays,
+            totalDurationMinutes = draft.totalDurationMinutes,
+            dueDateEpochDay = draft.dueDate?.toEpochDay(),
+            status = existing?.status ?: TaskStatus.NOT_STARTED.name,
+            completionSummary = existing?.completionSummary,
+            actualDurationMinutes = existing?.actualDurationMinutes,
+            progressPercent = existing?.progressPercent,
+            postponeCount = existing?.postponeCount ?: 0,
+            createdAtEpochMillis = existing?.createdAtEpochMillis ?: now,
+            updatedAtEpochMillis = now,
+            completionResult = existing?.completionResult,
+            scheduledForEpochDay = draft.scheduledForDate?.toEpochDay(),
+            inputSources = existing?.let { old ->
+                val previous = TaskInputSources.decode(old.inputSources)
+                draft.inputSources.copy(
+                    category = if (old.category == draft.category.name) previous.category else draft.inputSources.category,
+                    priority = if (old.userPriority != "UNSPECIFIED") previous.priority else draft.inputSources.priority,
+                    days = if (old.estimatedDays == draft.estimatedDays) previous.days else draft.inputSources.days,
+                    duration = if (old.totalDurationMinutes == draft.totalDurationMinutes) previous.duration else draft.inputSources.duration,
+                    dueDate = if (old.dueDateEpochDay == draft.dueDate?.toEpochDay()) previous.dueDate else draft.inputSources.dueDate,
+                    scheduledDate = if (old.scheduledForEpochDay == draft.scheduledForDate?.toEpochDay()) previous.scheduledDate else draft.inputSources.scheduledDate,
+                ).encode()
+            } ?: draft.inputSources.encode(),
+            origin = existing?.origin ?: com.swan1127.repland.domain.model.TaskOrigin.PERSONAL.name,
+            originRef = existing?.originRef,
+            originLabel = existing?.originLabel,
+            horizon = existing?.horizon?.takeUnless { it == TaskHorizon.UNSPECIFIED.name } ?: draft.horizon.name,
+            atMinute = draft.atMinute,
+            dailyInvestMinutes = draft.dailyInvestMinutes,
+            milestones = TaskMilestones.encode(draft.milestones),
+            importance = draft.importance,
+            tags = TaskTags.encode(draft.tags),
+        )
+        taskDao.insert(entity)
+        if (existing == null || entity.copy(updatedAtEpochMillis = existing.updatedAtEpochMillis) != existing) {
+            UsageSummaryRecorder.record(database,
+                if (existing == null) com.swan1127.repland.domain.model.UsageSummaryActionKind.TASK_CREATED
+                else com.swan1127.repland.domain.model.UsageSummaryActionKind.TASK_UPDATED,
+                taskId = entity.id, now = now)
+        }
+        if (existing != null && existing.scheduledForEpochDay != entity.scheduledForEpochDay) {
+            AutonomyManualOverrides(database).dateEdited(existing.id)
+        }
+    }
+
+    override suspend fun confirmStatus(
+        taskId: String,
+        status: TaskStatus,
+        feedback: TaskFeedback,
+    ) = database.withTransaction {
+        require(status != TaskStatus.REPLACED) {
+            "Task replacement must create a new task identity."
+        }
+        val existing = requireTask(taskId)
+        val currentStatus = TaskStatus.valueOf(existing.status)
+        require(TaskLifecycleValidator.isValidStatusConfirmation(currentStatus, status)) {
+            "Invalid user-confirmed status transition: $currentStatus -> $status"
+        }
+        if (status == TaskStatus.COMPLETED) {
+            require(TaskLifecycleValidator.isValidCompletion(feedback)) {
+                "Completion accepts optional feedback and valid progress values."
+            }
+        } else {
+            require(TaskLifecycleValidator.isValidFeedback(feedback)) { "Invalid feedback values." }
+        }
+        val now = System.currentTimeMillis()
+        // Missing duration remains unknown. Planned duration and time since a status
+        // change are not evidence of actual work (they include breaks/background).
+        val effectiveFeedback = feedback
+        if (status == TaskStatus.IN_PROGRESS) freezeNumericOriginal(database, existing, now)
+        val logCreatedAt = nextLogCreatedAt(taskId, now)
+        taskDao.update(existing.withConfirmedStatus(status, effectiveFeedback, now))
+        executionLogDao.insert(
+            effectiveFeedback.toEntity(
+                taskId = taskId,
+                eventType = ExecutionLogEventType.STATUS_CHANGE,
+                confirmedStatus = status,
+                createdAtEpochMillis = logCreatedAt,
+            ),
+        )
+    }
+
+    override suspend fun recordFeedback(taskId: String, feedback: TaskFeedback) =
+        database.withTransaction {
+            require(TaskLifecycleValidator.isValidFeedback(feedback)) { "Invalid feedback values." }
+            require(TaskLifecycleValidator.hasFeedback(feedback)) { "Feedback cannot be empty." }
+            val existing = requireTask(taskId)
+            val status = TaskStatus.valueOf(existing.status)
+            require(status != TaskStatus.REPLACED) { "A replaced task keeps its historical evidence." }
+            val now = System.currentTimeMillis()
+            val logCreatedAt = nextLogCreatedAt(taskId, now)
+            taskDao.update(existing.withFeedbackSnapshot(feedback, now))
+            executionLogDao.insert(
+                feedback.toEntity(
+                    taskId = taskId,
+                    eventType = ExecutionLogEventType.FEEDBACK,
+                    confirmedStatus = status,
+                    createdAtEpochMillis = logCreatedAt,
+                ),
+            )
+        }
+
+    override suspend fun recordPartialCompletion(taskId: String, feedback: TaskFeedback) =
+        database.withTransaction {
+            require(TaskLifecycleValidator.isValidPartialCompletion(feedback)) {
+                "Partial completion progress must be unknown or between 1 and 99."
+            }
+            val existing = requireTask(taskId)
+            val currentStatus = TaskStatus.valueOf(existing.status)
+            require(currentStatus.isActive) { "Only an active task can be partially completed." }
+            val now = System.currentTimeMillis()
+            val logCreatedAt = nextLogCreatedAt(taskId, now)
+            taskDao.update(existing.withConfirmedStatus(TaskStatus.IN_PROGRESS, feedback, now))
+            executionLogDao.insert(
+                feedback.toEntity(
+                    taskId = taskId,
+                    eventType = ExecutionLogEventType.PARTIAL_COMPLETION,
+                    confirmedStatus = TaskStatus.IN_PROGRESS,
+                    createdAtEpochMillis = logCreatedAt,
+                ),
+            )
+        }
+
+    override suspend fun correctExecutionLog(
+        taskId: String,
+        correctedLogId: String,
+        feedback: TaskFeedback,
+    ) = database.withTransaction {
+        require(TaskLifecycleValidator.isValidFeedback(feedback)) { "Invalid feedback values." }
+        require(TaskLifecycleValidator.hasFeedback(feedback)) { "A correction must contain feedback." }
+        requireTask(taskId)
+        val corrected = requireNotNull(executionLogDao.getById(correctedLogId)) {
+            "The execution log to correct does not exist."
+        }
+        require(corrected.taskId == taskId) { "A correction must belong to the same task." }
+        val now = System.currentTimeMillis()
+        val logCreatedAt = nextLogCreatedAt(taskId, now)
+        // A historical correction does not silently rewrite the task's current state.
+        executionLogDao.insert(
+            feedback.toEntity(
+                taskId = taskId,
+                eventType = ExecutionLogEventType.CORRECTION,
+                confirmedStatus = TaskStatus.valueOf(corrected.confirmedStatus),
+                correctedLogId = correctedLogId,
+                createdAtEpochMillis = logCreatedAt,
+            ),
+        )
+    }
+
+    override suspend fun replaceTask(taskId: String, replacement: TaskDraft): String =
+        database.withTransaction {
+            require(TaskDraftValidator.isValid(replacement.copy(id = null))) {
+                "The replacement task needs valid task information."
+            }
+            val original = requireTask(taskId)
+            require(TaskStatus.valueOf(original.status).isActive) {
+                "Only an active task can be replaced."
+            }
+            val now = System.currentTimeMillis()
+            val logCreatedAt = nextLogCreatedAt(taskId, now)
+            val replacementId = UUID.randomUUID().toString()
+            taskDao.insert(
+                TaskEntity(
+                    id = replacementId,
+                    description = replacement.description.trim(),
+                    displayName = replacement.displayName.trim()
+                        .ifBlank { TaskName.fromDescription(replacement.description) },
+                    category = replacement.category.name,
+                    userPriority = replacement.userPriority.name,
+                    estimatedDays = replacement.estimatedDays,
+                    totalDurationMinutes = replacement.totalDurationMinutes,
+                    dueDateEpochDay = replacement.dueDate?.toEpochDay(),
+                    status = TaskStatus.NOT_STARTED.name,
+                    completionSummary = null,
+                    actualDurationMinutes = null,
+                    progressPercent = null,
+                    postponeCount = 0,
+                    createdAtEpochMillis = logCreatedAt,
+                    updatedAtEpochMillis = now,
+                    completionResult = null,
+                    scheduledForEpochDay = replacement.scheduledForDate?.toEpochDay(),
+                    inputSources = replacement.inputSources.encode(),
+                ),
+            )
+            taskDao.update(original.copy(status = TaskStatus.REPLACED.name, updatedAtEpochMillis = now))
+            executionLogDao.insert(
+                TaskFeedback().toEntity(
+                    taskId = taskId,
+                    eventType = ExecutionLogEventType.REPLACEMENT,
+                    confirmedStatus = TaskStatus.REPLACED,
+                    replacementTaskId = replacementId,
+                    createdAtEpochMillis = logCreatedAt,
+                ),
+            )
+            replacementId
+        }
+
+    private suspend fun requireTask(taskId: String): TaskEntity =
+        requireNotNull(taskDao.getById(taskId)) { "Task does not exist." }
+
+    /** Makes chronological ordering deterministic even for confirmations in one clock millisecond. */
+    private suspend fun nextLogCreatedAt(taskId: String, now: Long): Long {
+        val previous = executionLogDao.latestCreatedAtForTask(taskId) ?: return now
+        return maxOf(now, previous + 1)
+    }
+}
+
+private fun TaskEntity.withConfirmedStatus(
+    status: TaskStatus,
+    feedback: TaskFeedback,
+    now: Long,
+): TaskEntity = withFeedbackSnapshot(feedback, now).copy(
+    status = status.name,
+    progressPercent = if (status == TaskStatus.COMPLETED) 100 else feedback.progressPercent ?: progressPercent,
+    postponeCount = when {
+        status == TaskStatus.POSTPONED -> postponeCount + 1
+        // 收回顺延要连计数一起退回，否则三次点错再三次撤销就会弹出「需要你决定下一步」。
+        status == TaskStatus.NOT_STARTED && this.status == TaskStatus.POSTPONED.name -> (postponeCount - 1).coerceAtLeast(0)
+        else -> postponeCount
+    },
+)
+
+private fun TaskEntity.withFeedbackSnapshot(feedback: TaskFeedback, now: Long): TaskEntity = copy(
+    completionSummary = feedback.completedContent.cleanOrNull ?: completionSummary,
+    completionResult = feedback.completionResult.cleanOrNull ?: completionResult,
+    actualDurationMinutes = feedback.actualDurationMinutes ?: actualDurationMinutes,
+    progressPercent = feedback.progressPercent ?: progressPercent,
+    updatedAtEpochMillis = now,
+)
+
+private fun TaskFeedback.toEntity(
+    taskId: String,
+    eventType: ExecutionLogEventType,
+    confirmedStatus: TaskStatus,
+    correctedLogId: String? = null,
+    replacementTaskId: String? = null,
+    createdAtEpochMillis: Long,
+): ExecutionLogEntity = ExecutionLogEntity(
+    id = UUID.randomUUID().toString(),
+    taskId = taskId,
+    eventType = eventType.name,
+    confirmedStatus = confirmedStatus.name,
+    actualDurationMinutes = actualDurationMinutes,
+    progressPercent = progressPercent,
+    completedContent = completedContent.cleanOrNull,
+    completionResult = completionResult.cleanOrNull,
+    postponeReason = postponeReason.cleanOrNull,
+    correctedLogId = correctedLogId,
+    replacementTaskId = replacementTaskId,
+    createdAtEpochMillis = createdAtEpochMillis,
+)
+
+private val String?.cleanOrNull: String?
+    get() = this?.trim()?.takeIf(String::isNotBlank)

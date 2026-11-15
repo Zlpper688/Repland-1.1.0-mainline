@@ -1,0 +1,1160 @@
+package com.swan1127.repland.ui.agent
+
+import android.app.Activity
+import android.content.Intent
+import android.speech.RecognizerIntent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import com.swan1127.repland.ui.components.DesignButton as Button
+import com.swan1127.repland.ui.components.DesignFilterChip as FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import com.swan1127.repland.ui.components.DesignOutlinedButton as OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import com.swan1127.repland.domain.model.ArrangementAssistantInterpreter
+import com.swan1127.repland.domain.model.ArrangementAssistantAdviceResult
+import com.swan1127.repland.domain.model.AiAdvisorFailureReason
+import com.swan1127.repland.domain.model.ArrangementCandidate
+import com.swan1127.repland.domain.model.ArrangementClarification
+import com.swan1127.repland.domain.model.ArrangementDaySpreader
+import com.swan1127.repland.domain.model.ArrangementIntent
+import com.swan1127.repland.domain.model.ArrangementPlacementSource
+import com.swan1127.repland.domain.model.ArrangementTimeHint
+import com.swan1127.repland.domain.model.TaskCategory
+import com.swan1127.repland.domain.model.TaskDraft
+import com.swan1127.repland.domain.model.TaskName
+import com.swan1127.repland.domain.model.TaskPriority
+import com.swan1127.repland.domain.model.PlannedSegment
+import com.swan1127.repland.domain.model.TimelineEntry
+import com.swan1127.repland.domain.model.TimelineKind
+import com.swan1127.repland.domain.model.AssistantTaskProposal
+import com.swan1127.repland.domain.model.AssistantWorkspace
+import com.swan1127.repland.domain.model.RhythmTrack
+import com.swan1127.repland.domain.model.ArrangementExistingTask
+import com.swan1127.repland.domain.model.ArrangementExistingTaskLinker
+import com.swan1127.repland.domain.model.ArrangementAssistantAdviceRequest
+import com.swan1127.repland.domain.model.ArrangementOccupiedInterval
+import com.swan1127.repland.domain.model.AssistantSaveReceipt
+import com.swan1127.repland.domain.model.UserNumericInput
+import com.swan1127.repland.ui.components.PlannerIcons
+import com.swan1127.repland.ui.components.DesignIcons
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import java.util.UUID
+import kotlinx.coroutines.launch
+
+private typealias AgentTaskProposal = AssistantTaskProposal
+
+/** A follow-up sentence the draft can apply without calling the model. */
+private data class LocalFollowUpEdit(
+    val targetId: String,
+    val startMinute: Int?,
+    val durationMinutes: Int?,
+    val drop: Boolean = false,
+    val spread: Boolean = false,
+)
+
+private val SPREAD_INSTRUCTION = Regex("(排开|散开|松开|松一点|宽松|太紧|太挤|别排那么紧|别排这么紧|隔开|拉开|分散|留点空|留出空|空一点|喘口气)")
+
+/** "排开点" talks about the shape of the day, so it must never become a task of its own. */
+private fun isSpreadInstruction(text: String): Boolean =
+    text.trim().let { it.isNotEmpty() && it.length <= 24 && SPREAD_INSTRUCTION.containsMatchIn(it) }
+
+/** Re-lays the draft's placed items (and the day's committed ones) with a wider gap. */
+private fun spreadProposals(
+    proposals: List<AssistantTaskProposal>,
+    occupiedEntries: List<TimelineEntry>,
+    gapMinutes: Int = ArrangementDaySpreader.DEFAULT_GAP_MINUTES,
+): List<AssistantTaskProposal> {
+    if (proposals.size < 2) return emptyList()
+    val existingIds = proposals.mapNotNull { it.existingTaskId }.toSet()
+    val blocks = proposals.mapNotNull { proposal ->
+        val start = proposal.timeHint.explicitStartMinute ?: return@mapNotNull null
+        val duration = proposal.durationMinutes ?: return@mapNotNull null
+        ArrangementDaySpreader.Block(
+            id = proposal.id,
+            startMinute = start,
+            endMinute = start + duration,
+            fixed = proposal.placementSource == ArrangementPlacementSource.USER_EXPLICIT,
+        )
+    } + occupiedEntries
+        .filter { entry -> entry.taskId == null || entry.taskId !in existingIds }
+        .map { entry ->
+            ArrangementDaySpreader.Block(
+                id = entry.id,
+                startMinute = entry.startMinute,
+                endMinute = entry.endMinute,
+                fixed = entry.kind != TimelineKind.TASK ||
+                    entry.locked || entry.unavoidable || entry.taskClosed,
+            )
+        }
+    val moves = ArrangementDaySpreader.moves(blocks, gapMinutes)
+    if (moves.isEmpty()) return emptyList()
+    val byId = proposals.associateBy { it.id }
+    return moves.mapNotNull { move ->
+        val proposal = byId[move.id] ?: return@mapNotNull null
+        proposal.copy(
+            timeHint = proposal.timeHint.copy(explicitStartMinute = move.startMinute, windowLabel = null),
+            placementSource = ArrangementPlacementSource.AI_SUGGESTED,
+            needsClarification = proposal.needsClarification - ArrangementClarification.TIME,
+        )
+    }
+}
+
+/** Builds move proposals for the day that is already on the calendar. */
+private fun spreadScheduledDay(
+    occupiedEntries: List<TimelineEntry>,
+    existingTasks: List<ArrangementExistingTask>,
+    date: LocalDate,
+    gapMinutes: Int = ArrangementDaySpreader.DEFAULT_GAP_MINUTES,
+): List<AssistantTaskProposal> {
+    val scheduled = occupiedEntries.filter {
+        it.date == date && it.kind == TimelineKind.TASK &&
+            it.taskId != null && !it.locked && !it.unavoidable && !it.taskClosed
+    }
+    if (scheduled.size < 2) return emptyList()
+    val movableIds = scheduled.map { it.id }.toSet()
+    val blocks = scheduled.map { ArrangementDaySpreader.Block(it.id, it.startMinute, it.endMinute) } +
+        occupiedEntries
+            .filter { it.id !in movableIds }
+            .map {
+                ArrangementDaySpreader.Block(
+                    it.id,
+                    it.startMinute,
+                    it.endMinute,
+                    fixed = it.kind != TimelineKind.TASK ||
+                        it.locked || it.unavoidable || it.taskClosed,
+                )
+            }
+    val moves = ArrangementDaySpreader.moves(blocks, gapMinutes)
+    val byId = scheduled.associateBy { it.id }
+    return moves.mapNotNull { move ->
+        val entry = byId[move.id] ?: return@mapNotNull null
+        val taskId = entry.taskId ?: return@mapNotNull null
+        val task = existingTasks.firstOrNull { it.id == taskId }
+        AssistantTaskProposal(
+            id = java.util.UUID.randomUUID().toString(),
+            text = task?.title ?: entry.title,
+            category = task?.category ?: TaskCategory.UNSPECIFIED,
+            durationMinutes = entry.endMinute - entry.startMinute,
+            timeHint = ArrangementTimeHint(explicitStartMinute = move.startMinute, windowLabel = null),
+            needsClarification = emptySet(),
+            placementSource = ArrangementPlacementSource.AI_SUGGESTED,
+            trackId = entry.trackId,
+            existingTaskId = taskId,
+        )
+    }
+}
+
+/**
+ * Conversation-shaped planning: natural language becomes a disposable visual
+ * draft over the user's actual day. Nothing writes until explicit confirmation.
+ */
+@Composable
+fun AgentCenterScreen(
+    contextReady: Boolean = true,
+    activeDate: LocalDate = LocalDate.now(),
+    occupiedEntries: List<TimelineEntry> = emptyList(),
+    canRefineWithAi: Boolean = false,
+    onRefineWithAi: suspend (String, LocalDate, List<TimelineEntry>) -> ArrangementAssistantAdviceResult = { _, _, _ ->
+        ArrangementAssistantAdviceResult.Unavailable(AiAdvisorFailureReason.SERVICE_NOT_CONFIGURED)
+    },
+    onSaveTasks: (List<TaskDraft>) -> Unit,
+    onPlaceTask: (taskId: String, startMinute: Int, endMinute: Int, trackId: String) -> Unit,
+    onOpenTimeStudio: () -> Unit,
+    onConfirmBatch: ((List<TaskDraft>, List<PlannedSegment>, () -> Unit) -> Unit)? = null,
+    onFormulatePlan: () -> Unit = {},
+    canFormulatePlan: Boolean = true,
+    onArrangeExistingToday: () -> Unit = {},
+    initialWorkspace: AssistantWorkspace? = null,
+    onWorkspaceChanged: (AssistantWorkspace) -> Unit = {},
+    isSaving: Boolean = false,
+    contextRevision: String? = null,
+    providerRevision: Long? = null,
+    availableTracks: List<RhythmTrack> = emptyList(),
+    hasExistingTasks: Boolean = true,
+    onAddTask: () -> Unit = {},
+    hasAvailability: Boolean = true,
+    onConfigureAvailability: () -> Unit = {},
+    existingTasks: List<ArrangementExistingTask> = emptyList(),
+    onRefineWithContext: (suspend (ArrangementAssistantAdviceRequest) -> ArrangementAssistantAdviceResult)? = null,
+    onConfirmChanges: ((List<TaskDraft>, List<PlannedSegment>, Set<String>, LocalDate, () -> Unit) -> Unit)? = null,
+    saveReceipt: AssistantSaveReceipt? = null,
+    onDismissReceipt: () -> Unit = {},
+    onViewTasks: () -> Unit = {},
+    onViewSchedule: (LocalDate) -> Unit = {},
+    availableIntervals: List<com.swan1127.repland.domain.model.ArrangementAvailableInterval> = emptyList(),
+    onQueryTasks: (suspend (com.swan1127.repland.domain.model.TaskQueryScope) -> List<com.swan1127.repland.domain.model.Task>)? = null,
+    onExplainOrder: (suspend (String) -> com.swan1127.repland.domain.model.LocalPriorityAssessment)? = null,
+    onOpenTask: (String) -> Unit = {},
+    quickActions: (@Composable () -> Unit)? = null,
+) {
+    var prompt by rememberSaveable { mutableStateOf(initialWorkspace?.prompt.orEmpty()) }
+    var proposals by remember { mutableStateOf(initialWorkspace?.proposals.orEmpty()) }
+    var selectedIntent by rememberSaveable { mutableStateOf(initialWorkspace?.selectedIntent) }
+    // A free-form draft with an actual time must confirm that time, including
+    // drafts saved by earlier builds. Explicit "新增事项" still saves tasks only.
+    var intent by remember { mutableStateOf(initialWorkspace?.intent?.let { saved ->
+        if (initialWorkspace.selectedIntent == null && initialWorkspace.proposals.any {
+            it.existingTaskId != null || it.timeHint.explicitStartMinute != null
+        }) ArrangementIntent.ARRANGE_TODAY else saved
+    }) }
+    fun resolveIntent(candidates: List<ArrangementCandidate>, fallback: ArrangementIntent): ArrangementIntent =
+        selectedIntent ?: if (candidates.any { it.existingTaskId != null || it.timeHint.explicitStartMinute != null }) {
+            ArrangementIntent.ARRANGE_TODAY
+        } else fallback
+    var draftDate by remember { mutableStateOf(initialWorkspace?.date ?: activeDate) }
+    var draftRevision by remember { mutableStateOf(initialWorkspace?.sourceRevision) }
+    var requestVersion by remember { mutableStateOf(0L) }
+    var followUpInstruction by remember { mutableStateOf(initialWorkspace?.followUpInstruction.orEmpty()) }
+    fun persistWorkspace() {
+        onWorkspaceChanged(AssistantWorkspace(draftDate, prompt, proposals, intent, selectedIntent, draftRevision, followUpInstruction))
+    }
+    var transcriptError by rememberSaveable { mutableStateOf(false) }
+    var editingProposalId by rememberSaveable { mutableStateOf<String?>(null) }
+    var isRefining by remember { mutableStateOf(false) }
+    var requestJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+    fun invalidateRequest() {
+        requestVersion++
+        requestJob?.cancel()
+        requestJob = null
+        isRefining = false
+    }
+    LaunchedEffect(contextReady) { if (!contextReady) invalidateRequest() }
+    var queryTasks by remember { mutableStateOf<List<com.swan1127.repland.domain.model.Task>?>(null) }
+    var queryScope by remember { mutableStateOf<com.swan1127.repland.domain.model.TaskQueryScope?>(null) }
+    var explanation by remember { mutableStateOf<com.swan1127.repland.domain.model.LocalPriorityAssessment?>(null) }
+    var refinementMessage by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(canRefineWithAi, activeDate, occupiedEntries, contextRevision, providerRevision) { invalidateRequest(); queryTasks = null; explanation = null; refinementMessage = null }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val pageScroll = rememberScrollState()
+    val focusManager = LocalFocusManager.current
+    LaunchedEffect(saveReceipt?.id) {
+        if (saveReceipt != null && proposals.isEmpty() && prompt.isBlank()) {
+            focusManager.clearFocus()
+            pageScroll.scrollTo(0)
+        }
+    }
+    suspend fun refineCurrent(utterance: String, instruction: String? = null, includeDraft: Boolean = true): ArrangementAssistantAdviceResult {
+        val request = ArrangementAssistantAdviceRequest(utterance, activeDate, occupiedEntries.map {
+            ArrangementOccupiedInterval(it.title, it.startMinute, it.endMinute, it.trackId,
+                it.kind in setOf(TimelineKind.COURSE, TimelineKind.REST, TimelineKind.COMMITMENT), it.taskId)
+        }, existingTasks.take(50), (if (includeDraft) proposals else emptyList()).map {
+            ArrangementCandidate(it.text, it.category, it.durationMinutes, it.timeHint, it.needsClarification,
+                it.placementSource, it.trackId, it.existingTaskId, it.id)
+        }, instruction, availableIntervals, sourceRevision = contextRevision, allowedOperations = buildSet {
+            add(com.swan1127.repland.domain.model.ArrangementAdviceOperation.PROPOSE_CHANGES)
+            if (!includeDraft && selectedIntent == null && instruction == null) {
+                if (onQueryTasks != null) add(com.swan1127.repland.domain.model.ArrangementAdviceOperation.QUERY_TASKS)
+                if (onExplainOrder != null) add(com.swan1127.repland.domain.model.ArrangementAdviceOperation.EXPLAIN_ORDER)
+                if (canFormulatePlan && hasExistingTasks) add(com.swan1127.repland.domain.model.ArrangementAdviceOperation.FORMULATE_PLAN)
+            }
+        })
+        return onRefineWithContext?.invoke(request) ?: if (instruction != null) ArrangementAssistantAdviceResult.Unavailable(AiAdvisorFailureReason.SERVICE_NOT_CONFIGURED) else onRefineWithAi(utterance, activeDate, occupiedEntries)
+    }
+    val speechLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        val words = if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+        } else null
+        if (words.isNullOrBlank()) transcriptError = true else {
+            invalidateRequest()
+            prompt = words
+            followUpInstruction = ""
+            proposals = emptyList()
+            intent = null
+            transcriptError = false
+            isRefining = false
+            persistWorkspace()
+        }
+    }
+    fun previewCandidates(candidates: List<ArrangementCandidate>): List<AgentTaskProposal> {
+        val linked = if (selectedIntent == ArrangementIntent.CAPTURE_TASKS) {
+            candidates
+        } else {
+            ArrangementExistingTaskLinker.link(
+                candidates,
+                existingTasks,
+                listOf(prompt, followUpInstruction).filter(String::isNotBlank).joinToString("；"),
+            )
+        }
+        return parseProposal(linked, occupiedEntries).map { raw ->
+            val existing = existingTasks.firstOrNull { it.id == raw.existingTaskId }
+            val proposal = if (existing == null) raw else raw.copy(text = existing.title, category = existing.category)
+            if (selectedIntent != ArrangementIntent.CAPTURE_TASKS) proposal else proposal.copy(
+                timeHint = ArrangementTimeHint(), placementSource = ArrangementPlacementSource.UNSCHEDULED,
+                needsClarification = proposal.needsClarification - ArrangementClarification.TIME,
+            )
+        }
+    }
+    suspend fun applyAdvice(advice: com.swan1127.repland.domain.model.ArrangementAssistantAdvice, expectedVersion: Long) {
+        queryTasks = null; explanation = null
+        when (advice.operation) {
+            com.swan1127.repland.domain.model.ArrangementAdviceOperation.PROPOSE_CHANGES -> {
+                intent = resolveIntent(advice.candidates, ArrangementIntent.CAPTURE_TASKS)
+                proposals = previewCandidates(advice.candidates)
+                refinementMessage = "AI 已生成可编辑计划：${advice.confidenceLabel}"
+            }
+            com.swan1127.repland.domain.model.ArrangementAdviceOperation.QUERY_TASKS -> {
+                val scope = requireNotNull(advice.queryScope)
+                val result = requireNotNull(onQueryTasks).invoke(scope)
+                if (expectedVersion != requestVersion) return
+                proposals = emptyList(); intent = null; queryScope = scope; queryTasks = result
+                refinementMessage = "查询仅显示本地事实，不新增事项或修改计划。"
+            }
+            com.swan1127.repland.domain.model.ArrangementAdviceOperation.EXPLAIN_ORDER -> {
+                val result = requireNotNull(onExplainOrder).invoke(requireNotNull(advice.taskReference))
+                if (expectedVersion != requestVersion) return
+                proposals = emptyList(); intent = null; explanation = result
+                refinementMessage = "显示本地排序依据，不改顺序或用户优先级。"
+            }
+            com.swan1127.repland.domain.model.ArrangementAdviceOperation.FORMULATE_PLAN -> {
+                proposals = emptyList(); intent = null; onFormulatePlan()
+                refinementMessage = "已请求现有任务的本地规划预览，确认前不替换计划。"
+            }
+        }
+    }
+    suspend fun applyFailure(reason: AiAdvisorFailureReason, localQuery: com.swan1127.repland.domain.model.TaskQueryScope?, expectedVersion: Long) {
+        if (localQuery == null) {
+            refinementMessage = reason.userMessage("已保留拆分后的本地草案。")
+            return
+        }
+        try {
+            applyAdvice(com.swan1127.repland.domain.model.ArrangementAssistantAdvice(emptyList(), "", com.swan1127.repland.domain.model.ArrangementAdviceOperation.QUERY_TASKS, localQuery), expectedVersion)
+            if (expectedVersion == requestVersion) refinementMessage = reason.userMessage("已改用本地查询；没有新增事项或改动计划。")
+        } catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+        catch (_: Exception) { refinementMessage = "AI 请求失败，本地任务也暂时无法读取；保留输入，请重试，没有确认任何更改。" }
+    }
+    fun localFollowUpEdit(instruction: String): LocalFollowUpEdit? {
+        val text = instruction.trim()
+        if (text.isBlank() || proposals.isEmpty()) return null
+        if (Regex("(算了|不要了|先不|不排了|别排了|取消这次|不用了)").containsMatchIn(text)) {
+            return LocalFollowUpEdit(targetId = "", startMinute = null, durationMinutes = null, drop = true)
+        }
+        if (isSpreadInstruction(text) && proposals.size >= 2) {
+            return LocalFollowUpEdit(targetId = "", startMinute = null, durationMinutes = null, spread = true)
+        }
+        val parsed = ArrangementAssistantInterpreter.interpret(text)
+        val start = parsed.candidates.firstNotNullOfOrNull { it.timeHint.explicitStartMinute }
+        val duration = parsed.candidates.firstNotNullOfOrNull { it.durationMinutes }
+        if (start == null && duration == null) return null
+        val target = proposals.firstOrNull { it.text.isNotBlank() && text.contains(it.text) } ?: proposals.singleOrNull() ?: return null
+        return LocalFollowUpEdit(target.id, start, duration)
+    }
+    fun applyLocalFollowUp(edit: LocalFollowUpEdit) {
+        invalidateRequest()
+        followUpInstruction = ""
+        if (edit.drop) {
+            proposals = emptyList()
+            intent = null
+            refinementMessage = "已放弃这份草案，没有写入任何内容。"
+            persistWorkspace()
+            return
+        }
+        if (edit.spread) {
+            val spread = spreadProposals(proposals, occupiedEntries)
+            if (spread.isEmpty()) {
+                refinementMessage = "这份草案已经排得挺开了，我没有再挪。"
+                return
+            }
+            proposals = spread
+            refinementMessage = "已把草案里的事排开一点，中间约留 ${ArrangementDaySpreader.DEFAULT_GAP_MINUTES} 分钟；确认后才会写入。"
+            persistWorkspace()
+            return
+        }
+        val target = proposals.firstOrNull { it.id == edit.targetId } ?: return
+        val start = edit.startMinute ?: target.timeHint.explicitStartMinute
+        val duration = edit.durationMinutes ?: target.durationMinutes
+        if (start == null || duration == null) {
+            refinementMessage = "还差时长，补一句多久就能改。"
+            return
+        }
+        val rebuilt = parseProposal(
+            listOf(
+                ArrangementCandidate(
+                    title = target.text,
+                    category = target.category,
+                    durationMinutes = duration,
+                    timeHint = ArrangementTimeHint(explicitStartMinute = start, windowLabel = null),
+                    needsClarification = emptySet(),
+                    placementSource = ArrangementPlacementSource.USER_EXPLICIT,
+                    preferredTrackId = target.trackId,
+                    existingTaskId = target.existingTaskId,
+                    proposalId = target.id,
+                ),
+            ),
+            occupiedEntries,
+        ).firstOrNull() ?: return
+        proposals = proposals.map { if (it.id == target.id) rebuilt else it }
+        refinementMessage = "已按你的话改好草案；确认后才会写入。"
+        persistWorkspace()
+    }
+    val createPreview: () -> Unit = preview@{
+        if (!contextReady) {
+            refinementMessage = "请先重新读取任务和时间；输入与草案仍保留。"
+            return@preview
+        }
+        invalidateRequest()
+        followUpInstruction = ""
+        queryTasks = null; explanation = null
+        draftDate = activeDate
+        draftRevision = contextRevision
+        if (isSpreadInstruction(prompt)) {
+            val spread = spreadScheduledDay(occupiedEntries, existingTasks, activeDate)
+            if (spread.isEmpty()) {
+                refinementMessage = "这一天还没有两件以上已排的事，先说要做什么，我再来铺。"
+                return@preview
+            }
+            intent = ArrangementIntent.ARRANGE_TODAY
+            proposals = spread
+            persistWorkspace()
+            refinementMessage = "把排得紧的 ${spread.size} 段往后挪开，中间约留 ${ArrangementDaySpreader.DEFAULT_GAP_MINUTES} 分钟；确认后才会写入。"
+            return@preview
+        }
+        val interpretation = ArrangementAssistantInterpreter.interpret(prompt)
+        val localQuery = if (selectedIntent == null && onQueryTasks != null) com.swan1127.repland.domain.model.ArrangementReadIntent.queryScope(prompt) else null
+        intent = resolveIntent(interpretation.candidates, interpretation.intent)
+        proposals = if (localQuery == null) previewCandidates(interpretation.candidates) else emptyList()
+        persistWorkspace()
+        refinementMessage = if (canRefineWithAi) "AI 正在结合课程、固定事项和空档生成计划…" else "本地先拆分事项；配置 AI 后可基于今日占用提出时段建议。"
+        if (canRefineWithAi) {
+            val version = requestVersion
+            val requestPrompt = prompt
+            requestJob = scope.launch {
+                isRefining = true
+                val result = refineCurrent(requestPrompt, includeDraft = false)
+                if (version != requestVersion) return@launch
+                when (result) {
+                    is ArrangementAssistantAdviceResult.Advice -> {
+                        try { applyAdvice(result.advice, version) }
+                        catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                        catch (_: Exception) { refinementMessage = "无法读取本次操作结果，请重试；没有确认任何更改。" }
+                    }
+                    is ArrangementAssistantAdviceResult.Unavailable -> {
+                        applyFailure(result.reason, localQuery, version)
+                    }
+                    is ArrangementAssistantAdviceResult.Failed -> {
+                        applyFailure(result.reason, localQuery, version)
+                    }
+                }
+                if (version != requestVersion) return@launch
+                isRefining = false
+                persistWorkspace()
+            }
+        } else if (localQuery != null) {
+            val version = requestVersion
+            requestJob = scope.launch {
+                isRefining = true
+                try { applyAdvice(com.swan1127.repland.domain.model.ArrangementAssistantAdvice(emptyList(), "", com.swan1127.repland.domain.model.ArrangementAdviceOperation.QUERY_TASKS, localQuery), version) }
+                catch (cancelled: kotlinx.coroutines.CancellationException) { throw cancelled }
+                catch (_: Exception) { refinementMessage = "暂时无法读取任务，请重试；没有写入更改。" }
+                if (version != requestVersion) return@launch
+                isRefining = false; persistWorkspace()
+            }
+        }
+    }
+    val selectWorkflow: (String) -> Unit = { label ->
+        invalidateRequest()
+        refinementMessage = null
+        followUpInstruction = ""
+        isRefining = false
+        queryTasks = null; explanation = null
+        selectedIntent = if (label == "新增事项") ArrangementIntent.CAPTURE_TASKS else ArrangementIntent.ARRANGE_TODAY
+        proposals = emptyList()
+        intent = selectedIntent
+        persistWorkspace()
+        if (prompt.isNotBlank()) createPreview()
+        else if (selectedIntent == ArrangementIntent.ARRANGE_TODAY && canFormulatePlan) onArrangeExistingToday()
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize().verticalScroll(pageScroll).padding(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        AgentHero(activeDate, occupiedEntries, onOpenTimeStudio)
+        quickActions?.invoke()
+        saveReceipt?.let { receipt ->
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite }.testTag("agent-save-receipt")) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("上次保存成功：新增 ${receipt.result.createdTasks} 项、调整已有 ${receipt.result.adjustedTasks} 项，写入 ${receipt.result.writtenSegments} 个时段。", style = MaterialTheme.typography.bodyMedium)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = onViewTasks, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-view-saved-tasks")) { Text("查看任务") }
+                        if (receipt.result.writtenSegments > 0) TextButton(onClick = { onViewSchedule(receipt.result.date) }, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-view-saved-schedule")) { Text("查看安排") }
+                        TextButton(onClick = onDismissReceipt, modifier = Modifier.heightIn(min = 48.dp)) { Text("收起") }
+                    }
+                }
+            }
+        }
+        if (!hasExistingTasks) {
+            TextButton(onClick = onAddTask, modifier = Modifier.testTag("agent-add-first-task")) { Text("先记录任务 →") }
+        }
+        if (hasExistingTasks && !hasAvailability) {
+            Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(14.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text("先告诉我什么时候有空", style = MaterialTheme.typography.titleSmall)
+                    Text("补充可用时间后，就能为已有任务预览具体时段。", style = MaterialTheme.typography.bodySmall)
+                    TextButton(onClick = onConfigureAvailability, modifier = Modifier.testTag("agent-configure-availability")) { Text("设置可用时间 →") }
+                }
+            }
+        }
+        if (hasExistingTasks) {
+            OutlinedButton(onClick = onFormulatePlan, enabled = canFormulatePlan,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("agent-formulate-plan")) {
+                Text("用已有任务制定计划")
+            }
+            Text("重新排序并预览安排，确认后才应用。", style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        AgentComposer(
+            prompt = prompt,
+            canPreview = contextReady,
+            willUseAi = canRefineWithAi,
+            isWorking = isRefining,
+            onPromptChange = { invalidateRequest(); prompt = it; proposals = emptyList(); intent = null; followUpInstruction = ""; queryTasks = null; explanation = null; refinementMessage = null; persistWorkspace() },
+            onSeed = selectWorkflow,
+            onVoice = {
+                transcriptError = false
+                val speechIntent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                    putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
+                    putExtra(RecognizerIntent.EXTRA_PROMPT, "说出今天需要安排的事")
+                }
+                runCatching { speechLauncher.launch(speechIntent) }.onFailure { transcriptError = true }
+            },
+            onPreview = createPreview,
+        )
+        if (isRefining) {
+            TextButton(onClick = {
+                invalidateRequest()
+                refinementMessage = if (canRefineWithAi) "已取消本次请求，保留输入和本地草案；已发送的数据无法撤回，未确认任何更改。" else "已取消本次读取，保留输入，未确认任何更改。"
+            }, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-cancel-request")) { Text("取消本次请求") }
+        }
+        selectedIntent?.let { selected -> Text(if (selected == ArrangementIntent.CAPTURE_TASKS) "新增事项：确认后只保存任务，不自动排入时段。" else "安排今天：描述要做的事项，先预览再确认。", style = MaterialTheme.typography.bodySmall) }
+        if ((draftDate != activeDate || draftRevision != contextRevision) && proposals.isNotEmpty()) {
+            Text("日期、任务或时间设置已变化，请重新安排后再确认。", color = MaterialTheme.colorScheme.error)
+            TextButton(onClick = createPreview, modifier = Modifier.testTag("agent-refresh-draft")) { Text("按今天重新安排") }
+        }
+        if (transcriptError) Text("语音服务暂不可用；可以直接修改文字后继续。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+        if (queryTasks != null || explanation != null) {
+            Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = RoundedCornerShape(20.dp), modifier = Modifier.fillMaxWidth().testTag("agent-read-result")) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(refinementMessage.orEmpty(), style = MaterialTheme.typography.bodyMedium)
+                    queryTasks?.let { found ->
+                        Text("${when (queryScope) {
+                            com.swan1127.repland.domain.model.TaskQueryScope.TODAY -> if (activeDate == LocalDate.now()) "今天的任务" else "${activeDate.monthValue}月${activeDate.dayOfMonth}日的任务"
+                            com.swan1127.repland.domain.model.TaskQueryScope.INBOX -> "待安排任务"
+                            com.swan1127.repland.domain.model.TaskQueryScope.OVERDUE -> "逾期任务"
+                            else -> "未完成任务"
+                        }} · ${found.size} 项", style = MaterialTheme.typography.titleMedium)
+                        if (found.isEmpty()) Text("没有符合条件的任务。")
+                        found.take(50).forEach { task ->
+                            TextButton(onClick = { onOpenTask(task.id) }, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                                Text("${task.displayName} · ${task.totalDurationMinutes?.let { "$it 分钟" } ?: "时长待补充"}")
+                            }
+                        }
+                        if (found.size > 50) TextButton(onClick = onViewTasks, modifier = Modifier.heightIn(min = 48.dp)) { Text("前 50 项已显示，查看完整任务库") }
+                    }
+                    explanation?.let { assessment ->
+                        Text("${existingTasks.firstOrNull { it.id == assessment.taskId }?.title ?: "任务"}的排序依据", style = MaterialTheme.typography.titleMedium)
+                        assessment.reasons.forEach { Text(com.swan1127.repland.ui.priorityReasonText(it)) }
+                        Text("以上是本地规则因素；手动顺序仍保留，AI 不修改用户优先级。", style = MaterialTheme.typography.bodySmall)
+                        TextButton(onClick = { onOpenTask(assessment.taskId) }, modifier = Modifier.heightIn(min = 48.dp)) { Text("查看任务") }
+                    }
+                }
+            }
+        } else if (proposals.isEmpty()) {
+            if (refinementMessage != null) Text(refinementMessage.orEmpty(), style = MaterialTheme.typography.bodyMedium)
+            AgentEmptyState(canRefineWithAi)
+        } else {
+            AgentProposalPanel(
+                activeDate = activeDate,
+                intent = intent,
+                proposals = proposals,
+                occupiedEntries = occupiedEntries,
+                canRefineWithAi = contextReady && canRefineWithAi && !isSaving,
+                canApplyFollowUp = localFollowUpEdit(followUpInstruction) != null ||
+                    (contextReady && canRefineWithAi && !isSaving),
+                isRefining = isRefining,
+                canConfirm = contextReady && draftDate == activeDate && draftRevision == contextRevision && !isSaving && !isRefining && followUpInstruction.isBlank() && proposals.all { it.existingTaskId == null || (onConfirmChanges != null && intent != ArrangementIntent.CAPTURE_TASKS && existingTasks.any { task -> task.id == it.existingTaskId } && it.timeHint.explicitStartMinute != null && it.durationMinutes != null) },
+                followUpInstruction = followUpInstruction,
+                onFollowUpChange = { invalidateRequest(); followUpInstruction = it; persistWorkspace() },
+                refinementMessage = refinementMessage,
+                onRefine = {
+                    val instructionText = followUpInstruction.trim().takeIf { it.isNotEmpty() }
+                    val localEdit = localFollowUpEdit(instructionText.orEmpty())
+                    if (localEdit != null && (localEdit.drop || localEdit.spread)) {
+                        applyLocalFollowUp(localEdit)
+                    } else if (!canRefineWithAi && localEdit != null) {
+                        applyLocalFollowUp(localEdit)
+                    } else {
+                    invalidateRequest()
+                    val version = requestVersion
+                    val requestPrompt = prompt
+                    val instruction = instructionText
+                    requestJob = scope.launch {
+                        isRefining = true
+                        refinementMessage = null
+                        val result = refineCurrent(requestPrompt, instruction)
+                        if (version != requestVersion) return@launch
+                        when (result) {
+                            is ArrangementAssistantAdviceResult.Advice -> {
+                                draftDate = activeDate
+                                draftRevision = contextRevision
+                                intent = resolveIntent(result.advice.candidates, ArrangementIntent.CAPTURE_TASKS)
+                                proposals = previewCandidates(result.advice.candidates)
+                                followUpInstruction = ""
+                                refinementMessage = "AI 已校对草案：${result.advice.confidenceLabel}"
+                            }
+                            is ArrangementAssistantAdviceResult.Unavailable -> {
+                                if (localEdit != null) applyLocalFollowUp(localEdit)
+                                else refinementMessage = result.reason.userMessage("已保留本地草案。")
+                            }
+                            is ArrangementAssistantAdviceResult.Failed -> {
+                                if (localEdit != null) applyLocalFollowUp(localEdit)
+                                else refinementMessage = result.reason.userMessage("已保留本地草案。")
+                            }
+                        }
+                        isRefining = false
+                        persistWorkspace()
+                    }
+                    }
+                },
+                onRemove = { item -> invalidateRequest(); proposals = proposals - item; persistWorkspace() },
+                onEdit = { editingProposalId = it.id },
+                onConfirm = {
+                    val confirmedPrompt = prompt
+                    val confirmedProposals = proposals
+                    val confirmedIntent = intent
+                    val confirmedInstruction = followUpInstruction
+                    val taskDrafts = com.swan1127.repland.domain.model.AgentConfirmationSplit.taskDrafts(proposals, intent, activeDate)
+                    val segments = proposals.filter { intent != ArrangementIntent.CAPTURE_TASKS && it.timeHint.explicitStartMinute != null && it.durationMinutes != null }.map { item ->
+                        val start = requireNotNull(item.timeHint.explicitStartMinute)
+                        PlannedSegment(id = "proposal-${item.id}", taskId = item.existingTaskId ?: item.id, date = activeDate,
+                            startMinute = start, endMinute = start + requireNotNull(item.durationMinutes), trackId = item.trackId)
+                    }
+                    val clearAfterSave = {
+                        if (prompt == confirmedPrompt && proposals == confirmedProposals && intent == confirmedIntent && followUpInstruction == confirmedInstruction) {
+                            invalidateRequest(); prompt = ""; proposals = emptyList<AgentTaskProposal>(); intent = null; followUpInstruction = ""
+                        }
+                    }
+                    if (onConfirmChanges != null) onConfirmChanges(taskDrafts, segments, proposals.mapNotNull { it.existingTaskId }.toSet(), activeDate, clearAfterSave)
+                    else if (onConfirmBatch != null) onConfirmBatch(taskDrafts, segments, clearAfterSave)
+                    else {
+                        onSaveTasks(taskDrafts)
+                        segments.forEach { onPlaceTask(it.taskId, it.startMinute, it.endMinute, it.trackId) }
+                        clearAfterSave()
+                        persistWorkspace()
+                    }
+                },
+            )
+        }
+        Spacer(Modifier.height(24.dp))
+    }
+    proposals.firstOrNull { it.id == editingProposalId }?.let { proposal ->
+        AgentPlacementDialog(
+            proposal = proposal,
+            allProposals = proposals,
+            occupiedEntries = occupiedEntries,
+            availableTracks = availableTracks,
+            existingTasks = existingTasks,
+            onDismiss = { editingProposalId = null },
+            onSave = { updated -> invalidateRequest(); proposals = proposals.map { if (it.id == updated.id) updated else it }; editingProposalId = null; persistWorkspace() },
+        )
+    }
+}
+
+@Composable
+private fun AgentHero(activeDate: LocalDate, occupiedEntries: List<TimelineEntry>, onOpenTimeStudio: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Text("安排助手", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
+            Text(activeDate.format(DateTimeFormatter.ofPattern("M月d日 EEEE", Locale.SIMPLIFIED_CHINESE)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        Surface(onClick = onOpenTimeStudio, modifier = Modifier.size(width = 64.dp, height = 56.dp).testTag("agent-import-timetable"), shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.surfaceContainerLow,
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                Icon(DesignIcons.Calendar, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                Text("课表", style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+        ContextPill("${occupiedEntries.size} 项日程", DesignIcons.Calendar)
+        ContextPill("确认后才应用", DesignIcons.Assistant)
+    }
+}
+
+@Composable
+private fun ContextPill(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    Surface(color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(8.dp)) {
+        Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.primary)
+            Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun AgentComposer(prompt: String, willUseAi: Boolean, isWorking: Boolean, canPreview: Boolean = true, onPromptChange: (String) -> Unit, onSeed: (String) -> Unit, onVoice: () -> Unit, onPreview: () -> Unit) {
+    var showDataScope by rememberSaveable { mutableStateOf(false) }
+    Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+        Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(14.dp), modifier = Modifier.size(42.dp)) {
+                    Icon(DesignIcons.Assistant, contentDescription = null, modifier = Modifier.padding(10.dp), tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                Spacer(Modifier.width(10.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("描述新的安排", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(if (willUseAi) "理解事项，并根据今日固定安排提出可编辑时段。" else "先拆分事项、时间、时长和并行关系。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            OutlinedTextField(value = prompt, onValueChange = onPromptChange, modifier = Modifier.fillMaxWidth().testTag("agent-prompt"), minLines = 3, maxLines = 5, shape = RoundedCornerShape(12.dp), label = { Text("今天想怎么安排？") }, placeholder = { Text("例如：15:00 复习数据结构 90 分钟；同一时间跑步 40 分钟") })
+            if (willUseAi) {
+                Text("AI 将使用输入和相关任务信息生成预览。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                TextButton(onClick = { showDataScope = !showDataScope }, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-data-scope")) {
+                    Text(if (showDataScope) "收起数据范围" else "查看将发送的数据")
+                }
+                if (showDataScope) Text("生成时发送输入、当日占用/明确可用时段、当前草案、类别偏好，以及最多 50 项未完成任务的名称、类别、时长、状态、优先级、日期和进度。仅提及或草案引用的最多 5 项任务附最近 3 条有效反馈（文字各限 200 字）；不发送任务备注或密钥。无可用时间不自动选时段。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Row(modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                ComposerPreset("重排今天") { onSeed("安排今天") }
+                ComposerPreset("只新增任务") { onSeed("新增事项") }
+            }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AssistChip(onClick = onVoice, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-voice-input"), shape = RoundedCornerShape(10.dp), label = { Text("语音输入") }, leadingIcon = { Icon(PlannerIcons.Voice, contentDescription = null, modifier = Modifier.size(18.dp)) }, colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.secondaryContainer))
+                Spacer(Modifier.weight(1f))
+                Button(onClick = onPreview, enabled = canPreview && prompt.isNotBlank() && !isWorking, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-preview")) {
+                    Icon(DesignIcons.ArrowRight, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(7.dp))
+                    Text(if (isWorking) "生成中…" else if (willUseAi) "发送并预览" else "本地预览")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ComposerPreset(label: String, onClick: () -> Unit) {
+    Surface(onClick = onClick, color = MaterialTheme.colorScheme.secondaryContainer, shape = RoundedCornerShape(8.dp), modifier = Modifier.heightIn(min = 48.dp).testTag("agent-prompt-$label")) {
+        Box(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), contentAlignment = Alignment.Center) {
+            Text(label, style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun AgentEmptyState(willUseAi: Boolean) {
+    Surface(color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.62f), shape = RoundedCornerShape(22.dp)) {
+        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(if (willUseAi) "先给建议，再由你定案" else "先拆分，再决定时间", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+            Text(
+                if (willUseAi) "AI 会避开今天的课程、固定事项和休息，提出可编辑的时间与轨道建议；确认前不会写入。" else "本地模式只拆分你说的事项；不清楚的时间与时长会留在“待决定”。",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AgentProposalPanel(activeDate: LocalDate, intent: ArrangementIntent?, proposals: List<AgentTaskProposal>, occupiedEntries: List<TimelineEntry>, canRefineWithAi: Boolean, isRefining: Boolean, refinementMessage: String?, onRefine: () -> Unit, onRemove: (AgentTaskProposal) -> Unit, onEdit: (AgentTaskProposal) -> Unit, onConfirm: () -> Unit, canConfirm: Boolean = true, followUpInstruction: String = "", onFollowUpChange: (String) -> Unit = {}, canApplyFollowUp: Boolean = canRefineWithAi) {
+    val placed = proposals.filter { it.timeHint.explicitStartMinute != null && it.durationMinutes != null }
+    val undecided = proposals - placed.toSet()
+    val missing = proposals.flatMap(AgentTaskProposal::needsClarification).toSet()
+    Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = RoundedCornerShape(26.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text("今天的安排预览", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                    Text(intent.label(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                }
+                Surface(color = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f), shape = RoundedCornerShape(50)) { Text("${placed.size} 已落位 · ${undecided.size} 待决定", modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), style = MaterialTheme.typography.labelSmall) }
+            }
+            Text("浅色块是已占用时段，彩色块是本次草案。AI 建议的时段会明确标出；点彩色块可改时间、时长或轨道。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            if (canRefineWithAi) {
+                Surface(onClick = onRefine, enabled = !isRefining, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth().testTag("agent-refine-with-ai")) {
+                    Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(PlannerIcons.Send, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                        Spacer(Modifier.width(8.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(if (isRefining) "正在生成计划…" else "重新用 AI 校对计划", style = MaterialTheme.typography.labelLarge)
+                            Text("发送输入、当日占用/可用时段、当前草案、类别偏好与最多 50 项未完成任务事实；仅提及或草案引用的最多 5 项任务附最近 3 条有效反馈，文字各限 200 字。不发送任务备注或密钥；仍需确认写入。", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+            } else {
+                Text("当前为本地即时拆分；配置密钥并开启规划助手后，会结合今天已占用时段生成建议。", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            }
+            refinementMessage?.let { Text(it, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer) }
+            OutlinedTextField(value = followUpInstruction, onValueChange = onFollowUpChange, modifier = Modifier.fillMaxWidth().testTag("agent-follow-up"), label = { Text("继续说，改这份草案") }, placeholder = { Text("例如：把第一项挪到 16 点；排开点；或者说算了") }, minLines = 1, maxLines = 3)
+            Text(if (canRefineWithAi) "补充指令只修改当前预览，不直接新增任务。“排开点/算了”按本地规则立即生效，其余整份替换后可再确认。" else "没有 AI 也能改：说“挪到 16 点”“排开点”或“算了”，只改这份草案，确认后才写入。", style = MaterialTheme.typography.bodySmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = onRefine, enabled = canApplyFollowUp && !isRefining && followUpInstruction.isNotBlank(), modifier = Modifier.heightIn(min = 48.dp).testTag("agent-apply-follow-up")) { Text(if (isRefining) "修改中…" else "应用修改") }
+                if (followUpInstruction.isNotBlank()) TextButton(onClick = { onFollowUpChange("") }, modifier = Modifier.heightIn(min = 48.dp).testTag("agent-clear-follow-up")) { Text("放弃这次修改") }
+            }
+            if (followUpInstruction.isNotBlank()) Text("修改尚未应用；发送或放弃后才能确认。", style = MaterialTheme.typography.labelSmall)
+            proposals.filter { it.existingTaskId != null }.forEach { proposal ->
+                val before = occupiedEntries.filter { it.taskId == proposal.existingTaskId }.joinToString("、") { "${formatMinute(it.startMinute)}–${formatMinute(it.endMinute)}" }.ifEmpty { "未安排" }
+                Text("调整已有「${proposal.text}」：$before → ${proposal.previewLabel()}。仅替换所选日期的未保护安排，不改任务状态、优先级或总时长。", style = MaterialTheme.typography.bodySmall)
+            }
+            // 确认面板的两组去向：排进日程的和只记库的必须当面分开，未定时间不再静默落库。
+            if (placed.isNotEmpty()) {
+                Text(
+                    "排入今天（${placed.size}）",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            AgentDraftTimeline(activeDate, proposals, occupiedEntries, onEdit)
+            if (undecided.isNotEmpty()) UndecidedProposalShelf(undecided, onEdit, onRemove)
+            if (missing.isNotEmpty()) Text("还缺：${missing.joinToString("、") { it.label() }}。在「只记入事项库」里逐项补全；新增事项可不排时间，已有任务调整必须补全。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+            Button(onClick = onConfirm, enabled = canConfirm && !isRefining, modifier = Modifier.fillMaxWidth().testTag("agent-confirm-tasks")) {
+                Icon(Icons.Outlined.Add, contentDescription = null)
+                Spacer(Modifier.width(6.dp))
+                val existingCount = proposals.count { it.existingTaskId != null }
+                Text(if (existingCount > 0) "确认新增 ${proposals.size - existingCount} 项、调整已有 $existingCount 项" else "确认创建 ${proposals.size} 项${if (placed.isNotEmpty()) "并放入 ${placed.size} 个时段" else ""}")
+            }
+            Text(
+                buildString {
+                    append("确认后才会保存；已有任务必须补全时段。冲突或数据变化时整批不写入。")
+                    if (undecided.isNotEmpty()) append("其中 ${undecided.size} 项没有明确时间，只记入事项库，不排进今天的日程。")
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+            )
+        }
+    }
+}
+
+@Composable
+private fun UndecidedProposalShelf(items: List<AgentTaskProposal>, onEdit: (AgentTaskProposal) -> Unit, onRemove: (AgentTaskProposal) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag("agent-confirm-undecided-group")) {
+        Text("只记入事项库（${items.size}）", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+        Text(
+            "这些提案没有确定时间：确认后只保存为任务，scheduledForDate 为空，不会出现在今天的日程里。",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        items.forEach { proposal ->
+            Surface(onClick = { onEdit(proposal) }, color = MaterialTheme.colorScheme.surface.copy(alpha = 0.84f), shape = RoundedCornerShape(16.dp)) {
+                Row(modifier = Modifier.fillMaxWidth().padding(start = 12.dp, top = 10.dp, end = 4.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text(proposal.text, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+                        Text(proposal.previewLabel(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Icon(Icons.Outlined.Edit, contentDescription = "编辑", modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
+                    IconButton(onClick = { onRemove(proposal) }) { Icon(Icons.Outlined.Close, contentDescription = "移除 ${proposal.text}", modifier = Modifier.size(18.dp)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AgentDraftTimeline(activeDate: LocalDate, proposals: List<AgentTaskProposal>, occupiedEntries: List<TimelineEntry>, onEdit: (AgentTaskProposal) -> Unit) {
+    val anchored = proposals.filter { it.timeHint.explicitStartMinute != null && it.durationMinutes != null }
+    val tracks = (occupiedEntries.map(TimelineEntry::trackId) + listOf("focus", "parallel-2") + anchored.map(AgentTaskProposal::trackId)).distinct()
+    val earliest = (occupiedEntries.map(TimelineEntry::startMinute) + anchored.mapNotNull { it.timeHint.explicitStartMinute }).minOrNull() ?: 8 * 60
+    val latest = (occupiedEntries.map(TimelineEntry::endMinute) + anchored.mapNotNull { item -> item.timeHint.explicitStartMinute?.plus(item.durationMinutes ?: 0) }).maxOrNull() ?: 20 * 60
+    val startHour = ((earliest / 60) - 1).coerceIn(0, 22)
+    val endHour = ((latest + 59) / 60 + 1).coerceIn(startHour + 1, 24)
+    val hourHeight = 44.dp
+    val rulerWidth = 38.dp
+    val columnWidth = 118.dp
+    val headerHeight = 30.dp
+    val canvasHeight = headerHeight + hourHeight * (endHour - startHour)
+    Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(18.dp)) {
+        Box(modifier = Modifier.fillMaxWidth().height(canvasHeight + 20.dp).horizontalScroll(rememberScrollState()).padding(10.dp)) {
+            val contentWidth = rulerWidth + columnWidth * tracks.size
+            Box(Modifier.width(contentWidth).height(canvasHeight)) {
+                tracks.forEachIndexed { index, track ->
+                    Surface(modifier = Modifier.padding(start = rulerWidth + columnWidth * index).width(columnWidth - 6.dp).height(24.dp), shape = RoundedCornerShape(8.dp), color = if (track == "focus") MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHigh) {
+                        Text(track.label(), Modifier.padding(horizontal = 8.dp, vertical = 4.dp), style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                }
+                (startHour..endHour).forEach { hour ->
+                    val y = headerHeight + hourHeight * (hour - startHour)
+                    Text(String.format("%02d", hour % 24), Modifier.padding(top = y - 8.dp).width(rulerWidth), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Box(Modifier.padding(start = rulerWidth, top = y).width(columnWidth * tracks.size).height(1.dp).background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)))
+                }
+                occupiedEntries.forEach { entry ->
+                    val trackIndex = tracks.indexOf(entry.trackId).coerceAtLeast(0)
+                    val y = headerHeight + hourHeight * ((entry.startMinute - startHour * 60) / 60f)
+                    val blockHeight = (hourHeight * ((entry.endMinute - entry.startMinute) / 60f)).coerceAtLeast(29.dp)
+                    Surface(modifier = Modifier.padding(start = rulerWidth + columnWidth * trackIndex, top = y).width(columnWidth - 6.dp).heightIn(min = blockHeight).border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(10.dp)), color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(10.dp)) {
+                        Column(Modifier.padding(6.dp)) {
+                            Text(entry.title, style = MaterialTheme.typography.labelSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            Text(formatMinute(entry.startMinute), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+                anchored.forEach { proposal ->
+                    val start = requireNotNull(proposal.timeHint.explicitStartMinute)
+                    val trackIndex = tracks.indexOf(proposal.trackId).coerceAtLeast(0)
+                    val y = headerHeight + hourHeight * ((start - startHour * 60) / 60f)
+                    val blockHeight = (hourHeight * (requireNotNull(proposal.durationMinutes) / 60f)).coerceAtLeast(32.dp)
+                    Surface(onClick = { onEdit(proposal) }, modifier = Modifier.padding(start = rulerWidth + columnWidth * trackIndex, top = y).width(columnWidth - 6.dp).heightIn(min = blockHeight).testTag("agent-proposal-${proposal.id}"), color = previewColor(proposal.category), shape = RoundedCornerShape(11.dp)) {
+                        Column(Modifier.padding(7.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            Text(proposal.text, style = MaterialTheme.typography.labelSmall, maxLines = 2, overflow = TextOverflow.Ellipsis, fontWeight = FontWeight.SemiBold)
+                            Text("${formatMinute(start)} · ${proposal.durationMinutes} 分 · ${proposal.placementSource.label()}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                }
+                if (occupiedEntries.isEmpty() && anchored.isEmpty()) Text("还没有落位的事项", modifier = Modifier.padding(start = rulerWidth + 12.dp, top = headerHeight + 20.dp), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+    }
+    Text("${activeDate.format(DateTimeFormatter.ofPattern("M月d日", Locale.SIMPLIFIED_CHINESE))} · 真实时间刻度", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer)
+}
+
+@Composable
+private fun AgentPlacementDialog(proposal: AgentTaskProposal, allProposals: List<AgentTaskProposal>, occupiedEntries: List<TimelineEntry>, onDismiss: () -> Unit, onSave: (AgentTaskProposal) -> Unit, availableTracks: List<RhythmTrack> = emptyList(), existingTasks: List<ArrangementExistingTask> = emptyList()) {
+    val startingMinute = proposal.timeHint.explicitStartMinute ?: 9 * 60
+    var hour by rememberSaveable(proposal.id) { mutableStateOf((startingMinute / 60).toString()) }
+    var minute by rememberSaveable(proposal.id) { mutableStateOf((startingMinute % 60).toString().padStart(2, '0')) }
+    var duration by rememberSaveable(proposal.id) { mutableStateOf((proposal.durationMinutes ?: 30).toString()) }
+    var selectedTrack by rememberSaveable(proposal.id) { mutableStateOf(proposal.trackId) }
+    val tracks = (availableTracks.map { it.id } + occupiedEntries.map(TimelineEntry::trackId) + listOf("focus", "parallel-2", "parallel-3") + allProposals.map(AgentTaskProposal::trackId)).distinct()
+    val start = UserNumericInput.clockMinute(hour, minute)
+    val durationMinutes = UserNumericInput.integerIn(duration, 5..720)
+    val collision = start != null && durationMinutes != null && (
+        occupiedEntries.any { entry ->
+            !(entry.kind == TimelineKind.TASK && entry.taskId != null && entry.taskId == proposal.existingTaskId) &&
+            start < entry.endMinute && start + durationMinutes > entry.startMinute &&
+                (entry.kind in setOf(TimelineKind.COURSE, TimelineKind.REST, TimelineKind.COMMITMENT) || entry.trackId == selectedTrack)
+        } || allProposals.any { other ->
+            other.id != proposal.id && other.trackId == selectedTrack && other.timeHint.explicitStartMinute != null && other.durationMinutes != null &&
+                start < other.timeHint.explicitStartMinute + other.durationMinutes && start + durationMinutes > other.timeHint.explicitStartMinute
+        }
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("安排「${proposal.text}」") },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(if (proposal.existingTaskId == null) "新增事项" else "调整已有任务：${existingTasks.firstOrNull { it.id == proposal.existingTaskId }?.title ?: "引用已失效，请重新生成"}。不创建副本。", style = MaterialTheme.typography.bodySmall)
+                Text("可选任意时刻和轨道。课程、固定事项和休息不可重叠；普通任务可换轨并行。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(value = hour, onValueChange = { hour = it }, modifier = Modifier.weight(1f), singleLine = true, label = { Text("时") }, keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number))
+                    Text(":", style = MaterialTheme.typography.titleLarge)
+                    OutlinedTextField(value = minute, onValueChange = { minute = it }, modifier = Modifier.weight(1f), singleLine = true, label = { Text("分") }, keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number))
+                    OutlinedTextField(value = duration, onValueChange = { duration = it }, modifier = Modifier.weight(1.25f), singleLine = true, label = { Text("分钟") }, keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Number))
+                }
+                Text("轨道", style = MaterialTheme.typography.labelLarge)
+                Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) { tracks.forEach { track -> FilterChip(selected = selectedTrack == track, onClick = { selectedTrack = track }, label = { Text(availableTracks.firstOrNull { it.id == track }?.name ?: track.label()) }) } }
+                when {
+                    start == null || durationMinutes == null -> Text("请输入 00:00–23:59，以及 5–720 分钟。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    start + durationMinutes > 1_440 -> Text("结束时间不能超过当天 24:00。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                    collision -> Text("这个时段与课程、固定事项或同轨安排冲突；可改时间或换轨处理普通任务并行。", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = { onSave(proposal.copy(durationMinutes = requireNotNull(durationMinutes), timeHint = ArrangementTimeHint(explicitStartMinute = requireNotNull(start), windowLabel = null), needsClarification = emptySet(), placementSource = ArrangementPlacementSource.USER_EXPLICIT, trackId = selectedTrack)) }, enabled = start != null && durationMinutes != null && start + durationMinutes <= 1_440 && !collision) { Text("更新草案") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
+    )
+}
+
+private fun parseProposal(candidates: List<ArrangementCandidate>, occupiedEntries: List<TimelineEntry>): List<AgentTaskProposal> {
+    val allocated = mutableListOf<AgentTaskProposal>()
+    candidates.forEach { candidate ->
+        val remainingEntries = occupiedEntries.filterNot { it.kind == TimelineKind.TASK && it.taskId != null && it.taskId == candidate.existingTaskId }
+        var start = candidate.timeHint.explicitStartMinute
+        val duration = candidate.durationMinutes
+        var source = candidate.placementSource
+        var track = candidate.preferredTrackId ?: "focus"
+        if (start != null && duration != null && source == ArrangementPlacementSource.AI_SUGGESTED) {
+            val placement = findSafeAiPlacement(start, duration, candidate.preferredTrackId, remainingEntries, allocated)
+            if (placement == null) {
+                start = null
+                source = ArrangementPlacementSource.UNSCHEDULED
+            } else {
+                start = placement.startMinute
+                track = placement.trackId
+            }
+        } else if (start != null && duration != null) {
+            // Explicit user times stay where the user said. We only choose a
+            // non-overlapping visual lane for ordinary simultaneous work.
+            track = chooseTrackAt(start, duration, candidate.preferredTrackId, remainingEntries, allocated, rejectHardBusy = false)
+                ?: (candidate.preferredTrackId ?: "focus")
+            if (source == ArrangementPlacementSource.UNSCHEDULED) source = ArrangementPlacementSource.USER_EXPLICIT
+        }
+        val hint = candidate.timeHint.copy(explicitStartMinute = start)
+        val missing = candidate.needsClarification.toMutableSet().apply {
+            if (start == null) add(ArrangementClarification.TIME) else remove(ArrangementClarification.TIME)
+            if (duration == null) add(ArrangementClarification.DURATION) else remove(ArrangementClarification.DURATION)
+        }
+        allocated += AgentTaskProposal(
+            id = candidate.proposalId ?: UUID.randomUUID().toString(),
+            text = candidate.title,
+            category = candidate.category,
+            durationMinutes = duration,
+            timeHint = hint,
+            needsClarification = missing,
+            placementSource = source,
+            trackId = track,
+            existingTaskId = candidate.existingTaskId,
+        )
+    }
+    return allocated
+}
+
+private data class SuggestedPlacement(val startMinute: Int, val trackId: String)
+
+/**
+ * The model proposes a start, but the client verifies it against real fixed
+ * commitments. If that point became unavailable, it searches forward in
+ * five-minute steps and never uses a second track to tunnel through a class.
+ */
+private fun findSafeAiPlacement(
+    preferredStart: Int,
+    duration: Int,
+    preferredTrackId: String?,
+    occupiedEntries: List<TimelineEntry>,
+    allocated: List<AgentTaskProposal>,
+): SuggestedPlacement? {
+    val starts = buildList {
+        addAll(preferredStart.coerceIn(8 * 60, 22 * 60 - duration)..(22 * 60 - duration) step 5)
+        addAll(8 * 60 until preferredStart.coerceIn(8 * 60, 22 * 60 - duration) step 5)
+    }.distinct()
+    return starts.firstNotNullOfOrNull { start ->
+        chooseTrackAt(start, duration, preferredTrackId, occupiedEntries, allocated, rejectHardBusy = true)
+            ?.let { track -> SuggestedPlacement(start, track) }
+    }
+}
+
+private fun chooseTrackAt(
+    start: Int,
+    duration: Int,
+    preferredTrackId: String?,
+    occupiedEntries: List<TimelineEntry>,
+    allocated: List<AgentTaskProposal>,
+    rejectHardBusy: Boolean,
+): String? {
+    val end = start + duration
+    if (rejectHardBusy && occupiedEntries.any { entry ->
+            entry.kind in setOf(TimelineKind.COURSE, TimelineKind.REST, TimelineKind.COMMITMENT) && start < entry.endMinute && end > entry.startMinute
+        }
+    ) return null
+    val tracks = listOfNotNull(preferredTrackId) + listOf("focus") + (2..8).map { "parallel-$it" } + occupiedEntries.map(TimelineEntry::trackId)
+    return tracks.distinct().firstOrNull { candidateTrack ->
+        occupiedEntries.none { entry -> entry.trackId == candidateTrack && start < entry.endMinute && end > entry.startMinute } &&
+            allocated.none { other ->
+                other.trackId == candidateTrack && other.timeHint.explicitStartMinute != null && other.durationMinutes != null &&
+                    start < other.timeHint.explicitStartMinute + other.durationMinutes && end > other.timeHint.explicitStartMinute
+            }
+    }
+}
+
+private fun AgentTaskProposal.previewLabel(): String = buildList {
+    add(if (existingTaskId == null) "新增事项" else "已有任务")
+    add(timeHint.explicitStartMinute?.let(::formatMinute) ?: timeHint.windowLabel ?: "时间待定")
+    add(durationMinutes?.let { "$it 分钟" } ?: "时长待定")
+    add(placementSource.label())
+}.joinToString(" · ")
+
+private fun ArrangementPlacementSource.label(): String = when (this) {
+    ArrangementPlacementSource.USER_EXPLICIT -> "用户指定"
+    ArrangementPlacementSource.AI_SUGGESTED -> "AI 建议"
+    ArrangementPlacementSource.UNSCHEDULED -> "待决定"
+}
+
+private fun AiAdvisorFailureReason.userMessage(fallback: String): String = when (this) {
+    AiAdvisorFailureReason.SOURCE_CHANGED -> "任务、时间或偏好已变化，请重新生成；$fallback"
+    AiAdvisorFailureReason.CONTEXT_UNAVAILABLE -> "暂时无法读取规划数据，请重试；$fallback"
+    AiAdvisorFailureReason.CONFIGURATION_CHANGED -> "模型配置已变化，请重新生成；$fallback"
+    AiAdvisorFailureReason.INVALID_RESPONSE -> "AI 的回复格式不完整，已自动保留本地草案；可点“重新用 AI 校对计划”重试。"
+    AiAdvisorFailureReason.TIMEOUT -> "AI 响应超时，$fallback"
+    AiAdvisorFailureReason.TRANSPORT_FAILURE -> "无法连接 AI 服务，请检查网络、接口地址和模型名；$fallback"
+    AiAdvisorFailureReason.AUTHENTICATION_FAILURE -> "AI 拒绝了鉴权，请检查密钥所属服务区与密钥状态；$fallback"
+    AiAdvisorFailureReason.RATE_LIMITED -> "AI 当前触发了请求额度或频率限制，请稍后重试；$fallback"
+    AiAdvisorFailureReason.REMOTE_FAILURE -> "AI 服务暂时异常，请稍后重试；$fallback"
+    AiAdvisorFailureReason.SERVICE_NOT_CONFIGURED -> "请先在“我的”配置接口、模型与密钥；$fallback"
+    AiAdvisorFailureReason.DISABLED -> "规划助手尚未开启；$fallback"
+}
+
+private fun ArrangementIntent?.label(): String = when (this) {
+    ArrangementIntent.ARRANGE_TODAY -> "识别为：安排今天"
+    ArrangementIntent.CAPTURE_TASKS -> "识别为：收进事项库"
+    ArrangementIntent.REPLAN -> "识别为：先生成可编辑调整草案"
+    ArrangementIntent.REVIEW -> "识别为：先整理成可回看的事项"
+    null -> "可继续逐项调整"
+}
+
+private fun ArrangementClarification.label(): String = when (this) {
+    ArrangementClarification.TIME -> "什么时候安排"
+    ArrangementClarification.DURATION -> "预计多久"
+}
+
+private fun String.label(): String = when (this) {
+    "focus" -> "专注"
+    "course" -> "课程"
+    "fixed" -> "固定"
+    "rest" -> "休息"
+    "parallel-2" -> "并行 2"
+    "parallel-3" -> "并行 3"
+    else -> removePrefix("parallel-").toIntOrNull()?.let { "并行 $it" } ?: this
+}
+
+private fun previewColor(category: TaskCategory): Color = when (category) {
+    TaskCategory.UNSPECIFIED -> Color(0xFFCCD0D5)
+    TaskCategory.COURSE -> Color(0xFFB7C9F5)
+    TaskCategory.EXTRACURRICULAR -> Color(0xFFAFE2D2)
+    TaskCategory.OFFICE -> Color(0xFFF1C78D)
+    TaskCategory.LEISURE -> Color(0xFFDCC1EB)
+}
+
+private fun formatMinute(minute: Int): String = String.format("%02d:%02d", minute / 60, minute % 60)

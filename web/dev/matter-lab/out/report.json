@@ -1,0 +1,719 @@
+{
+  "corpusTotal": 500,
+  "selected": 500,
+  "rule": {
+    "total": 500,
+    "covered": 471,
+    "coverage": 0.942,
+    "coveredAccuracy": 0.9978768577494692,
+    "coveredUnsafe": 0
+  },
+  "ai": null,
+  "boundary": {
+    "reasons": [
+      {
+        "reason": "multi-intent",
+        "total": 9,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "correction",
+        "total": 3,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "ambiguous",
+        "total": 3,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "missing-name",
+        "total": 3,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "unsupported-recurrence",
+        "total": 2,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "conditional",
+        "total": 2,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "fixed-block",
+        "total": 2,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "english",
+        "total": 2,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "cross-midnight",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "relative-anchor",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "pronoun",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "ambiguous-clock",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "english-intent",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "bulk-move",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      },
+      {
+        "reason": "people",
+        "total": 1,
+        "coverage": 0,
+        "coveredAccuracy": null,
+        "unsafe": 0
+      }
+    ],
+    "tags": [
+      {
+        "tag": "correction",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "cross-midnight",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "anchor",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "unsupported-recurrence",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "ambiguous",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "missing-task",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "pronoun",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "needs-draft",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "conditional",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "multi-intent",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "overlap",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "fixed-block",
+        "total": 2,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "date-format",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "english-unit",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "english",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "self-correction",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "bulk-move",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "overdue",
+        "total": 1,
+        "ruleCoverage": 0,
+        "ruleCoveredAccuracy": null,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "constraint",
+        "total": 2,
+        "ruleCoverage": 0.5,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "ai",
+        "total": 84,
+        "ruleCoverage": 0.6666666666666666,
+        "ruleCoveredAccuracy": 0.9821428571428571,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "due-date",
+        "total": 3,
+        "ruleCoverage": 0.6666666666666666,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "review",
+        "total": 42,
+        "ruleCoverage": 0.8571428571428571,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "self-report",
+        "total": 42,
+        "ruleCoverage": 0.8571428571428571,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "routine",
+        "total": 92,
+        "ruleCoverage": 0.9891304347826086,
+        "ruleCoveredAccuracy": 0.989010989010989,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "rules",
+        "total": 333,
+        "ruleCoverage": 0.996996996996997,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "explicit",
+        "total": 120,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "assignment",
+        "total": 80,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "exam",
+        "total": 50,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "meeting",
+        "total": 51,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "competition",
+        "total": 66,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "errand",
+        "total": 67,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "habit",
+        "total": 45,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "generic",
+        "total": 45,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "date-only",
+        "total": 61,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "capture",
+        "total": 52,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "daily",
+        "total": 22,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "auto-time",
+        "total": 43,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "workdays",
+        "total": 20,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "explicit-time",
+        "total": 40,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "weekend",
+        "total": 20,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "weekly",
+        "total": 20,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "move",
+        "total": 52,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "status",
+        "total": 40,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "complete",
+        "total": 11,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "cancel",
+        "total": 11,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "postpone",
+        "total": 10,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "progress",
+        "total": 10,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "range",
+        "total": 3,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "relative-date",
+        "total": 3,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "deadline",
+        "total": 6,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "actual",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "chat",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "no-action",
+        "total": 2,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "query",
+        "total": 2,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "free-time",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "time-budget",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "busy-block",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "note",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "break",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "spread",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "typo",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "dialect",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "arabic",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "decimal",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "date-range",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 0,
+        "aiAccuracy": null
+      },
+      {
+        "tag": "boundary",
+        "total": 1,
+        "ruleCoverage": 1,
+        "ruleCoveredAccuracy": 1,
+        "aiAccuracy": null
+      }
+    ]
+  },
+  "ruleFailures": [
+    {
+      "id": "A038",
+      "category": "adversarial",
+      "utterance": "明天下午三点写报告两个小时，然后四点开组会一小时",
+      "reasons": [
+        "multi-intent"
+      ],
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "写报告 然后四点开组会一小时",
+            "date": "2026-11-16",
+            "startMinute": 900,
+            "endMinute": null,
+            "durationMinutes": 120
+          }
+        ],
+        "needsAI": true,
+        "mustAsk": false,
+        "reasons": [
+          "multi-intent"
+        ],
+        "confidence": 0.55,
+        "spans": {
+          "date": "明天",
+          "time": "下午三点",
+          "duration": "两个小时"
+        }
+      }
+    },
+    {
+      "id": "A039",
+      "category": "adversarial",
+      "utterance": "明天下午三点开会，顺便把周报写了",
+      "reasons": [
+        "multi-intent"
+      ],
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "create",
+            "name": "开会 顺便 周报写",
+            "date": "2026-11-16",
+            "startMinute": 900,
+            "endMinute": null,
+            "durationMinutes": 60
+          }
+        ],
+        "needsAI": true,
+        "mustAsk": false,
+        "reasons": [
+          "multi-intent"
+        ],
+        "confidence": 0.55,
+        "spans": {
+          "date": "明天",
+          "time": "下午三点"
+        }
+      }
+    },
+    {
+      "id": "A051",
+      "category": "adversarial",
+      "utterance": "下周一到周三每天上午复习高数",
+      "reasons": [],
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "routine",
+            "name": "每天上午复习高数",
+            "date": null,
+            "startMinute": null,
+            "endMinute": null,
+            "durationMinutes": 90,
+            "weekdays": [
+              1,
+              2,
+              3
+            ]
+          }
+        ],
+        "needsAI": false,
+        "mustAsk": false,
+        "reasons": [],
+        "confidence": 0.75,
+        "spans": {
+          "date": "下周一",
+          "recurrence": "下周一到周三"
+        }
+      }
+    },
+    {
+      "id": "A060",
+      "category": "adversarial",
+      "utterance": "这周数学作业没交，老师说明天要补交",
+      "reasons": [
+        "people"
+      ],
+      "prediction": {
+        "intent": "plan",
+        "items": [
+          {
+            "action": "progress",
+            "name": "数学作业 交 老师说 要补交",
+            "date": null,
+            "startMinute": null,
+            "durationMinutes": null,
+            "progress": null
+          },
+          {
+            "action": "create",
+            "name": "数学作业 交 老师说 要补交",
+            "date": "2026-11-16",
+            "startMinute": null,
+            "durationMinutes": null
+          }
+        ],
+        "needsAI": true,
+        "mustAsk": false,
+        "reasons": [
+          "people"
+        ],
+        "confidence": 0.55,
+        "spans": {
+          "date": "明天"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+# Repland Android quality gates (complements .github/workflows/android.yml).
+#
+# Relationship: android.yml runs the full push/PR verification (unit tests + lint +
+# full API 26 connected suite). This workflow adds the stricter/cheaper gate set:
+#   * jvm-gates               — JDK 21, orphan-string gate, :app:testDebugUnitTest + :app:lintDebug
+#   * instrumented-regression — parameterized emulator run (Room Migration*Test by default),
+#                               triggered only manually (workflow_dispatch) or weekly scheduled,
+#                               to keep per-PR CI time short.
+# Once both workflows are trusted, consider slimming android.yml's push trigger to avoid
+# running unit tests twice per push (kept as-is here to not weaken existing coverage).
+#
+# Gradle build cache:
+#   * gradle/actions/setup-gradle@v4 caches ~/.gradle/caches and ~/.gradle/wrapper
+#     (dependencies + wrapper distributions) and restores them on later runs.
+#   * For task-output caching additionally set `org.gradle.caching=true` in
+#     android/gradle.properties; saved/restored build-cache-1 travels inside the same
+#     setup-gradle cache entry. Not enabled by default here to keep local builds
+#     byte-identical until the team opts in.
+name: Android quality gates
+
+on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch:
+    inputs:
+      api_level:
+        description: 'Emulator API level for the instrumented job (34+)'
+        required: false
+        default: '34'
+      test_classes:
+        description: 'Comma-separated instrumented test classes (empty = default Migration set)'
+        required: false
+        default: ''
+  schedule:
+    # Weekly regression window: Monday 02:00 UTC (10:00 Asia/Shanghai).
+    - cron: '0 2 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gates-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  jvm-gates:
+    name: JVM gates (orphan strings + unit + lint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+      - name: Install compile SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Orphan string gate
+        working-directory: android
+        shell: pwsh
+        run: ./scripts/check-orphan-strings.ps1
+      - name: Unit tests and lint
+        working-directory: android
+        # JVM layer has NO *Migration* tests (verified 2026-11-03: src/test contains none).
+        # Room schema migrations are covered by instrumented tests — Migration5To6Test,
+        # Migration20To21Test, Migration23To24Test, Migration24To25Test — which run in the
+        # instrumented-regression job below (default class list) and locally via
+        # scripts/run-instrumented.ps1. Keep this mapping in sync when new Migration tests land.
+        run: ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jvm-gates-reports
+          path: |
+            android/app/build/reports/tests/testDebugUnitTest/
+            android/app/build/test-results/testDebugUnitTest/
+            android/app/build/reports/lint-results-debug.*
+          retention-days: 14
+
+  instrumented-regression:
+    name: Instrumented regression (parameterized emulator)
+    needs: jvm-gates
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DEFAULT_TEST_CLASSES: >-
+        com.swan1127.repland.Migration5To6Test,com.swan1127.repland.Migration20To21Test,com.swan1127.repland.Migration23To24Test,com.swan1127.repland.Migration24To25Test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools emulator
+      - name: Install compile SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - name: Enable and verify KVM acceleration
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          sudo udevadm settle
+          if [[ ! -r /dev/kvm || ! -w /dev/kvm ]]; then
+            echo "::error::The runner must have read/write access to /dev/kvm for emulator tests."
+            exit 1
+          fi
+          "$ANDROID_HOME/emulator/emulator" -accel-check
+      - name: Build app and test APKs before starting the emulator
+        working-directory: android
+        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
+      - name: Run parameterized connected tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ inputs.api_level || '34' }}
+          target: google_apis
+          arch: x86_64
+          ram-size: 2048M
+          disable-linux-hw-accel: 'false'
+          emulator-options: -accel on -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          working-directory: android
+          script: |
+            ./gradlew --no-daemon :app:connectedDebugAndroidTest \
+              "-Pandroid.testInstrumentationRunnerArguments.class=${{ inputs.test_classes || env.DEFAULT_TEST_CLASSES }}"
+      - name: Upload instrumented test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumented-regression-reports
+          path: |
+            android/app/build/reports/androidTests/connected/
+            android/app/build/outputs/androidTest-results/connected/
+          retention-days: 14

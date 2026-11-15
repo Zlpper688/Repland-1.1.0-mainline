@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="repland_window_background">#171921</color>
+    <color name="repland_splash_background">#152226</color>
+    <color name="repland_primary">#A8D9DE</color>
+    <color name="repland_widget_text">#E9EBF1</color>
+    <color name="repland_widget_muted">#B8BECA</color>
+</resources>

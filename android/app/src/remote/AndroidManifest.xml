@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- 自托管后端是局域网/本机 HTTP（§13 App 只配「后端地址 + 账号 token」），必须放行明文；
+         AI 端点的 https 约束由 CompatibleChatTransport 代码层独立强制，天气走 https 公共 API。
+         release 构建不含本 sourceSet，离线边界不变。 -->
+    <application android:usesCleartextTraffic="true" tools:replace="android:usesCleartextTraffic" />
+</manifest>

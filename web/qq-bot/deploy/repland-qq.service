@@ -1,0 +1,17 @@
+[Unit]
+Description=Repland QQ bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/repland-qq
+ExecStart=/usr/bin/env node --env-file=.env index.mjs
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+StandardOutput=append:/var/log/repland-qq.log
+StandardError=append:/var/log/repland-qq.log
+
+[Install]
+WantedBy=multi-user.target

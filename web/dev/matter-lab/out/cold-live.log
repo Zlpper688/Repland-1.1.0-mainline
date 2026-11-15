@@ -1,0 +1,103 @@
+K001 FAIL ai=OK src=ai proto=-
+K002 FAIL ai=OK src=ai proto=-
+K003 FAIL ai=OK src=ai proto=-
+K004 FAIL ai=OK src=ai proto=-
+K005 FAIL ai=OK src=ai proto=-
+K006 FAIL ai=OK src=ai proto=-
+K007 FAIL ai=OK src=ai proto=-
+K008 OK ai=FAIL src=ai proto=-
+K009 FAIL ai=FAIL src=clarify proto=-
+local fallback on K010, cooling 45s
+K010 FAIL ai=OK src=ai proto=-
+K011 FAIL ai=OK src=ai proto=-
+K012 FAIL ai=OK src=ai proto=-
+K013 OK ai=FAIL src=ai proto=-
+K014 FAIL ai=OK src=ai proto=-
+K015 FAIL ai=OK src=ai proto=-
+K016 FAIL ai=OK src=ai proto=-
+K017 FAIL ai=OK src=ai proto=-
+K018 FAIL ai=OK src=ai proto=-
+K019 FAIL ai=FAIL src=ai proto=-
+local fallback on K020, cooling 45s
+K020 OK ai=OK src=ai proto=-
+K021 OK ai=OK src=ai proto=-
+K022 OK ai=FAIL src=ai proto=-
+K023 OK ai=FAIL src=ai proto=-
+rotated guest
+K024 OK ai=OK src=ai proto=-
+K025 OK ai=OK src=ai proto=-
+K026 FAIL ai=FAIL src=clarify proto=-
+K027 OK ai=OK src=ai proto=-
+K028 OK ai=FAIL src=ai proto=-
+K029 FAIL ai=FAIL src=ai proto=move
+local fallback on K030, cooling 45s
+K030 FAIL ai=OK src=ai proto=move
+K031 FAIL ai=OK src=ai proto=move
+K032 FAIL ai=OK src=ai proto=-
+K033 FAIL ai=OK src=ai proto=move
+K034 FAIL ai=OK src=ai proto=move
+K035 FAIL ai=OK src=ai proto=-
+K036 FAIL ai=OK src=ai proto=-
+K037 FAIL ai=OK src=ai proto=move
+K038 FAIL ai=FAIL src=ai proto=move
+K039 FAIL ai=FAIL src=clarify proto=-
+local fallback on K040, cooling 45s
+K040 FAIL ai=FAIL src=clarify proto=-
+K041 OK ai=OK src=ai proto=-
+K042 FAIL ai=FAIL src=clarify proto=-
+K043 FAIL ai=FAIL src=clarify proto=-
+K044 FAIL ai=FAIL src=clarify proto=-
+K045 OK ai=FAIL src=ai proto=postpone
+K046 OK ai=FAIL src=ai proto=postpone
+rotated guest
+K047 FAIL ai=FAIL src=clarify proto=-
+K048 FAIL ai=FAIL src=ai proto=-
+K049 OK ai=OK src=ai proto=-
+local fallback on K050, cooling 45s
+K050 OK ai=OK src=ai proto=-
+K051 OK ai=FAIL src=ai proto=review
+K052 FAIL ai=FAIL src=clarify proto=-
+K053 FAIL ai=FAIL src=ai proto=-
+K054 OK ai=OK src=ai proto=review
+K055 OK ai=OK src=ai proto=review
+K056 FAIL ai=FAIL src=clarify proto=-
+K057 OK ai=OK src=ai proto=review
+K058 OK ai=FAIL src=ai proto=review
+K059 FAIL ai=FAIL src=ai proto=-
+local fallback on K060, cooling 45s
+K060 FAIL ai=FAIL src=clarify proto=-
+K061 FAIL ai=OK src=ai proto=-
+K062 FAIL ai=OK src=ai proto=-
+K063 FAIL ai=OK src=ai proto=-
+K064 FAIL ai=OK src=ai proto=-
+K065 FAIL ai=OK src=ai proto=-
+K066 FAIL ai=OK src=ai proto=-
+K067 OK ai=OK src=ai proto=-
+K068 FAIL ai=OK src=ai proto=-
+K069 FAIL ai=OK src=ai proto=-
+rotated guest
+local fallback on K070, cooling 45s
+K070 OK ai=OK src=ai proto=-
+K071 OK ai=OK src=ai proto=-
+K072 OK ai=OK src=ai proto=-
+K073 OK ai=FAIL src=ai proto=-
+K074 OK ai=FAIL src=ai proto=-
+K075 OK ai=FAIL src=ai proto=-
+K076 OK ai=OK src=ai proto=-
+K077 OK ai=OK src=ai proto=-
+K078 OK ai=OK src=ai proto=-
+K079 OK ai=OK src=ai proto=-
+K080 OK ai=OK src=error proto=-
+local fallback on K081, cooling 45s
+K081 FAIL ai=FAIL src=ai proto=-
+K082 FAIL ai=FAIL src=ai proto=-
+K083 OK ai=OK src=clarify proto=-
+K084 OK ai=OK src=clarify proto=-
+K085 OK ai=OK src=clarify proto=-
+K086 FAIL ai=FAIL src=ai proto=-
+K087 OK ai=OK src=clarify proto=-
+K088 FAIL ai=FAIL src=ai proto=-
+K089 FAIL ai=OK src=ai proto=-
+K090 FAIL ai=OK src=ai proto=-
+ai {"accuracy":0.6333333333333333,"unsafe":6,"total":90}
+hybrid {"accuracy":0.4,"unsafe":0,"total":90}

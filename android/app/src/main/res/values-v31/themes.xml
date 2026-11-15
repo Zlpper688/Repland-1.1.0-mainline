@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 冷启动：纸白 splash 面 + 山水自适应图标，进场交给 Compose 侧交叉淡入。 -->
+    <style name="Theme.Repland" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowSplashScreenBackground">@color/repland_splash_background</item>
+        <item name="android:windowBackground">@color/repland_splash_background</item>
+    </style>
+
+</resources>
